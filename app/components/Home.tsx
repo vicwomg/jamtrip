@@ -10,7 +10,7 @@ import {
   jackLspPath,
   jackTripPath,
 } from '../constants/constants';
-import ConnectionCode from './Client';
+import ClientConnect from './Client';
 import HostServer from './HostServer';
 
 const Home = () => {
@@ -73,7 +73,7 @@ const Home = () => {
           </div>
         ) : (
           <>
-            {tab === 'CLIENT' && <ConnectionCode />}
+            {tab === 'CLIENT' && <ClientConnect />}
             {tab === 'SERVER' && <HostServer />}
           </>
         )}

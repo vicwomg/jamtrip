@@ -21,6 +21,7 @@ import {
   startJackTripServer,
 } from '../features/jackInterface';
 import sendProcessOutput from '../features/sendProcessOutput';
+import ConnectionIndicator from './ConnectionIndicator';
 import LogButtons from './LogButtons';
 
 const PortStatusIcon = ({ status }: { status: boolean | undefined }) => {
@@ -50,6 +51,7 @@ const HostServer = () => {
   const [hubPortOpen, setHubPortOpen] = React.useState<boolean>();
 
   const [serverStart, setServerStart] = React.useState<boolean>(false);
+  const [connected, setConnected] = React.useState<boolean>(false);
 
   const connectionCodeRef = React.useRef(null);
   const outputLogRef = React.useRef(null);
@@ -80,6 +82,33 @@ const HostServer = () => {
         .catch(() => {});
     }
   }, [host]);
+
+  React.useEffect(() => {
+    if (serverStart) {
+      const waitForConnection = (timer: number) => {
+        if (timer > 300000 && serverStart) {
+          killProcesses();
+          // eslint-disable-next-line no-alert
+          alert(
+            'Timed out waiting for connection to server. Check the log output.'
+          );
+          return;
+        }
+        if (
+          !outputLogRef.current.value.includes('Client Connection Received!')
+        ) {
+          window.setTimeout(() => waitForConnection(timer + 1000), 1000);
+        } else {
+          sendProcessOutput(
+            outputLogRef,
+            connectChannel('system:capture_1', 'JackTrip:send_1')
+          );
+          setConnected(true);
+        }
+      };
+      waitForConnection(0);
+    }
+  }, [serverStart]);
 
   const handleConnect = () => {
     killProcesses();
@@ -118,6 +147,7 @@ const HostServer = () => {
   };
   const handleDisconnect = () => {
     killProcesses();
+    setConnected(false);
     setServerStart(false);
   };
 
@@ -186,7 +216,8 @@ const HostServer = () => {
           <div className="has-text-danger is-size-7" style={{ marginTop: 10 }}>
             <i className="fas fa-exclamation-circle" /> Port {hubConnectionPort}{' '}
             is not accessible. To run in hub mode outside of your local network,
-            you will need to open ports 61000, 61001, 61002 ... 61XXX and so on
+            you will need to open ports {hubConnectionPort},{' '}
+            {hubConnectionPort + 1}, {hubConnectionPort + 2} ... and so on
             depending on how many concurrent connections you hope to support.
           </div>
         )}
@@ -278,7 +309,7 @@ const HostServer = () => {
             onClick={handleConnect}
             className="button is-rounded is-success"
           >
-            Start
+            Start server
           </button>
         </div>
       ) : (
@@ -289,9 +320,14 @@ const HostServer = () => {
               onClick={handleDisconnect}
               className="button is-rounded is-danger"
             >
-              Disconnect
+              Stop server
             </button>
           </div>
+          <ConnectionIndicator
+            connected={connected}
+            standbyMessage="Waiting for a connection..."
+            successMessage="connected!"
+          />
           <div className="field">
             <div className="label">Log output</div>
             <textarea

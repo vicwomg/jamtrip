@@ -9,9 +9,10 @@ import {
   startJackTripClient,
 } from '../features/jackInterface';
 import sendProcessOutput from '../features/sendProcessOutput';
+import ConnectionIndicator from './ConnectionIndicator';
 import LogButtons from './LogButtons';
 
-const ConnectionCode = () => {
+const ClientConnect = () => {
   const [host, setHost] = React.useState<string>('');
   const [sampleRate, setSampleRate] = React.useState<string>('');
   const [bufferSize, setBufferSize] = React.useState<string>('');
@@ -20,6 +21,7 @@ const ConnectionCode = () => {
   const [manualConnect, setManualConnect] = React.useState<boolean>(false);
 
   const [connect, setConnect] = React.useState<boolean>(false);
+  const [connected, setConnected] = React.useState<boolean>(false);
 
   const isValid =
     !!host && !!sampleRate && !!bufferSize && typeof hub === 'boolean';
@@ -46,6 +48,31 @@ const ConnectionCode = () => {
   }, [connectionCode]);
 
   const outputElement = React.useRef(null);
+
+  React.useEffect(() => {
+    if (connect) {
+      const waitForConnection = (timer: number) => {
+        if (timer > 45000 && connect) {
+          killProcesses();
+          // eslint-disable-next-line no-alert
+          alert(
+            'Timed out waiting for connection to server. Check the log output.'
+          );
+          return;
+        }
+        if (
+          !outputElement.current.value.includes(
+            'Received Connection from Peer!'
+          )
+        ) {
+          window.setTimeout(() => waitForConnection(timer + 1000), 1000);
+        } else {
+          setConnected(true);
+        }
+      };
+      waitForConnection(0);
+    }
+  }, [connect]);
 
   const handleConnect = () => {
     killProcesses();
@@ -98,6 +125,7 @@ const ConnectionCode = () => {
   const handleDisconnect = () => {
     killProcesses();
     setConnect(false);
+    setConnected(false);
   };
 
   const handleToggleManualConf = () => {
@@ -235,6 +263,11 @@ const ConnectionCode = () => {
               Disconnect
             </button>
           </div>
+          <ConnectionIndicator
+            connected={connected}
+            standbyMessage="connecting to server..."
+            successMessage="connected!"
+          />
           <div className="field">
             <div className="label">Log output</div>
             <textarea
@@ -261,4 +294,4 @@ const ConnectionCode = () => {
   );
 };
 
-export default ConnectionCode;
+export default ClientConnect;
