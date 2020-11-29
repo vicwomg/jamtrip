@@ -15,6 +15,7 @@ import {
 import generateConnectionCode from '../features/connectionCode';
 import {
   connectChannel,
+  isJackServerRunning,
   killProcesses,
   startJackdmp,
   startJackTripServer,
@@ -83,24 +84,37 @@ const HostServer = () => {
   const handleConnect = () => {
     killProcesses();
     setServerStart(true);
+
     const jackdmp = startJackdmp(bufferSize, sampleRate);
     sendProcessOutput(outputLogRef, jackdmp);
-    setTimeout(() => {
-      const jacktrip = startJackTripServer(hub);
-      sendProcessOutput(outputLogRef, jacktrip);
-    }, 2000);
-    setTimeout(() => {
-      const jackConnect1 = connectChannel(
-        'system:capture_1',
-        'system:playback_1'
-      );
-      sendProcessOutput(outputLogRef, jackConnect1);
-      const jackConnect2 = connectChannel(
-        'system:capture_1',
-        'system:playback_2'
-      );
-      sendProcessOutput(outputLogRef, jackConnect2);
-    }, 4000);
+
+    const waitForJackServer = (timer: number) => {
+      if (timer > 15000) {
+        killProcesses();
+        // eslint-disable-next-line no-alert
+        alert(
+          'Timed out waiting for JACK server to start. Check the log output'
+        );
+        return;
+      }
+      if (!isJackServerRunning()) {
+        window.setTimeout(() => waitForJackServer(timer + 500), 500);
+      } else {
+        const jacktrip = startJackTripServer(hub);
+        sendProcessOutput(outputLogRef, jacktrip);
+        setTimeout(() => {
+          sendProcessOutput(
+            outputLogRef,
+            connectChannel('system:capture_1', 'system:playback_1')
+          );
+          sendProcessOutput(
+            outputLogRef,
+            connectChannel('system:capture_1', 'system:playback_2')
+          );
+        }, 2000);
+      }
+    };
+    waitForJackServer(0);
   };
   const handleDisconnect = () => {
     killProcesses();
@@ -122,10 +136,7 @@ const HostServer = () => {
             disabled
           />
         </div>
-        <ul
-          className="is-size-7"
-          style={{ listStyle: 'disc inside', marginTop: 10 }}
-        >
+        <ul className="is-size-7" style={{ marginTop: 10 }}>
           <li>
             Base port {connectionPort} open?{' '}
             <PortStatusIcon status={portOpen} />
@@ -225,36 +236,38 @@ const HostServer = () => {
       <hr />
       {isValid && (
         <>
-          <div className="label">Connection code</div>
-          <div className="field has-addons">
-            <div className="control">
-              <input
-                className="input"
-                style={{ width: 300 }}
-                ref={connectionCodeRef}
-                value={generateConnectionCode(
-                  host,
-                  sampleRate,
-                  bufferSize,
-                  hub
-                )}
-              />
+          <div className="box has-background-grey-lighter">
+            <div className="label">Connection code</div>
+            <div className="field has-addons">
+              <div className="control">
+                <input
+                  className="input"
+                  style={{ width: 300 }}
+                  ref={connectionCodeRef}
+                  value={generateConnectionCode(
+                    host,
+                    sampleRate,
+                    bufferSize,
+                    hub
+                  )}
+                />
+              </div>
+              <div className="control">
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => {
+                    connectionCodeRef.current.select();
+                    document.execCommand('copy');
+                  }}
+                >
+                  <i className="fas fa-copy" />
+                  &nbsp;copy
+                </button>
+              </div>
             </div>
-            <div className="control">
-              <button
-                type="button"
-                className="button has-background-grey-lighter"
-                onClick={() => {
-                  connectionCodeRef.current.select();
-                  document.execCommand('copy');
-                }}
-              >
-                <i className="fas fa-copy" />
-                &nbsp;copy
-              </button>
-            </div>
+            <p className="help">Send this code to the other side.</p>
           </div>
-          <p className="help">Send this to code to the other side.</p>
         </>
       )}
       {!serverStart ? (

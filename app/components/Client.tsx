@@ -3,6 +3,7 @@ import React from 'react';
 import { bufferSizes, sampleRates } from '../constants/constants';
 import {
   connectChannel,
+  isJackServerRunning,
   killProcesses,
   startJackdmp,
   startJackTripClient,
@@ -49,38 +50,49 @@ const ConnectionCode = () => {
   const handleConnect = () => {
     killProcesses();
     setConnect(true);
+
     const jackdmp = startJackdmp(bufferSize, sampleRate);
     sendProcessOutput(outputElement, jackdmp);
 
-    setTimeout(() => {
-      const jacktrip = startJackTripClient(host, hub);
-      sendProcessOutput(outputElement, jacktrip);
-    }, 2000);
-
-    setTimeout(() => {
-      const jackConnect1 = connectChannel(
-        'system:capture_1',
-        'system:playback_1'
-      );
-      sendProcessOutput(outputElement, jackConnect1);
-      const jackConnect2 = connectChannel(
-        'system:capture_1',
-        'system:playback_2'
-      );
-      sendProcessOutput(outputElement, jackConnect2);
-      const jackConnect3 = connectChannel(
-        `${host}:receive_1`,
-        'system:playback_1'
-      );
-      sendProcessOutput(outputElement, jackConnect3);
-      const jackConnect4 = connectChannel(
-        `${host}:receive_1`,
-        'system:playback_2'
-      );
-      sendProcessOutput(outputElement, jackConnect4);
-      const jackConnect5 = connectChannel(`system:capture_1`, `${host}:send_1`);
-      sendProcessOutput(outputElement, jackConnect5);
-    }, 4000);
+    const waitForJackServer = (timer: number) => {
+      if (timer > 15000) {
+        killProcesses();
+        // eslint-disable-next-line no-alert
+        alert(
+          'Timed out waiting for JACK server to start. Check the log output'
+        );
+        return;
+      }
+      if (!isJackServerRunning()) {
+        window.setTimeout(() => waitForJackServer(timer + 500), 500);
+      } else {
+        const jacktrip = startJackTripClient(host, hub);
+        sendProcessOutput(outputElement, jacktrip);
+        setTimeout(() => {
+          sendProcessOutput(
+            outputElement,
+            connectChannel('system:capture_1', 'system:playback_1')
+          );
+          sendProcessOutput(
+            outputElement,
+            connectChannel('system:capture_1', 'system:playback_2')
+          );
+          sendProcessOutput(
+            outputElement,
+            connectChannel(`${host}:receive_1`, 'system:playback_1')
+          );
+          sendProcessOutput(
+            outputElement,
+            connectChannel(`${host}:receive_1`, 'system:playback_2')
+          );
+          sendProcessOutput(
+            outputElement,
+            connectChannel(`system:capture_1`, `${host}:send_1`)
+          );
+        }, 2000);
+      }
+    };
+    waitForJackServer(0);
   };
 
   const handleDisconnect = () => {

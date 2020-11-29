@@ -7,6 +7,7 @@ import React from 'react';
 import {
   jackConnectPath,
   jackDmpPath,
+  jackLspPath,
   jackTripPath,
 } from '../constants/constants';
 import ConnectionCode from './Client';
@@ -16,13 +17,19 @@ const Home = () => {
   const [tab, setTab] = React.useState<'CLIENT' | 'SERVER'>('CLIENT');
   const [binariesExist, setBinariesExist] = React.useState<boolean>(true);
 
+  const requiredBinaries = [
+    jackTripPath,
+    jackConnectPath,
+    jackDmpPath,
+    jackLspPath,
+  ];
+
   React.useEffect(() => {
-    setBinariesExist(
-      fs.existsSync(jackTripPath) &&
-        fs.existsSync(jackConnectPath) &&
-        fs.existsSync(jackDmpPath)
-    );
-  }, []);
+    const b = requiredBinaries.reduce((accumulator, currentValue) => {
+      return accumulator && fs.existsSync(currentValue);
+    }, true);
+    setBinariesExist(b);
+  }, [requiredBinaries]);
 
   return (
     <div className="section">
@@ -44,17 +51,25 @@ const Home = () => {
 
         {!binariesExist ? (
           <div className="notification is-danger">
-            JACK or JackTrip binaries were not found. Have you installed them?
-            For instructions, see the{' '}
+            Some required files were not found. Have you installed JACK and
+            JackTrip? For instructions, see the{' '}
             <a
               onClick={() => {
                 shell.openExternal(
-                  'https://ccrma.stanford.edu/software/jacktrip/osx/index.html'
+                  'https://ccrma.stanford.edu/software/jacktrip/'
                 );
               }}
             >
               CCRMA web site
             </a>
+            <h3 style={{ marginTop: 10 }}>
+              <b>Required files:</b>
+            </h3>
+            <ul>
+              {requiredBinaries.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
+            </ul>
           </div>
         ) : (
           <>

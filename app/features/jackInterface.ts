@@ -1,7 +1,8 @@
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import {
   jackConnectPath,
   jackDmpPath,
+  jackLspPath,
   jackTripPath,
 } from '../constants/constants';
 
@@ -16,6 +17,12 @@ export const startJackdmp = (bufferSize: string, sampleRate: string) => {
     '-r',
     sampleRate,
   ]);
+};
+
+export const isJackServerRunning = () => {
+  // jack_lsp will return an error if jack server isn't running
+  const proc = spawnSync(jackLspPath);
+  return proc.status === 0;
 };
 
 export const startJackTripClient = (host: string, hub: boolean) => {
