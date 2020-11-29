@@ -41,7 +41,7 @@ const PortStatusIcon = ({ status }: { status: boolean | undefined }) => {
 };
 
 const HostServer = () => {
-  const [host, setHost] = React.useState<string>();
+  const [host, setHost] = React.useState<string>('');
   const [sampleRate, setSampleRate] = React.useState<string>('48000');
   const [bufferSize, setBufferSize] = React.useState<string>('128');
   const [hub, setHub] = React.useState<boolean>(false);
