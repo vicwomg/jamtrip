@@ -52,7 +52,7 @@ const ClientConnect = () => {
   React.useEffect(() => {
     if (connect) {
       const waitForConnection = (timer: number) => {
-        if (timer > 45000 && connect) {
+        if (timer > 30000 && connect) {
           killProcesses();
           // eslint-disable-next-line no-alert
           alert(

@@ -38,6 +38,6 @@ export const connectChannel = (source: string, destination: string) => {
 };
 
 export const killProcesses = () => {
-  spawn('killall', ['jackdmp']);
-  spawn('killall', ['jacktrip']);
+  spawnSync('killall', ['jackdmp']);
+  spawnSync('killall', ['jacktrip']);
 };
