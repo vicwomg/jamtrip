@@ -274,7 +274,6 @@
     "electron-log": "^4.2.4",
     "electron-updater": "^4.3.4",
     "history": "^4.7.2",
-    "is-port-reachable": "^3.0.0",
     "public-ip": "^4.0.2",
     "react": "^16.13.1",
     "react-dom": "^16.12.0",

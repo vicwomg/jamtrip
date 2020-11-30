@@ -1,9 +1,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { shell } from 'electron';
-import isPortReachable from 'is-port-reachable';
 import publicIp from 'public-ip';
 import React from 'react';
 import {
@@ -24,31 +22,13 @@ import sendProcessOutput from '../features/sendProcessOutput';
 import ConnectionIndicator from './ConnectionIndicator';
 import LogButtons from './LogButtons';
 
-const PortStatusIcon = ({ status }: { status: boolean | undefined }) => {
-  return (
-    <>
-      {status === undefined ? (
-        <i className="fas fa-spinner fa-spin" />
-      ) : (
-        <>
-          {typeof status === 'boolean' && status ? (
-            <i className="fas fa-check has-text-success" />
-          ) : (
-            <i className="fas fa-times has-text-danger" />
-          )}
-        </>
-      )}
-    </>
-  );
-};
-
 const HostServer = () => {
   const [host, setHost] = React.useState<string>('');
   const [sampleRate, setSampleRate] = React.useState<string>('48000');
   const [bufferSize, setBufferSize] = React.useState<string>('128');
   const [hub, setHub] = React.useState<boolean>(false);
-  const [portOpen, setPortOpen] = React.useState<boolean>();
-  const [hubPortOpen, setHubPortOpen] = React.useState<boolean>();
+  // const [portOpen, setPortOpen] = React.useState<boolean>();
+  // const [hubPortOpen, setHubPortOpen] = React.useState<boolean>();
 
   const [serverStart, setServerStart] = React.useState<boolean>(false);
   const [connected, setConnected] = React.useState<boolean>(false);
@@ -67,23 +47,6 @@ const HostServer = () => {
   }, []);
 
   React.useEffect(() => {
-    if (host) {
-      isPortReachable(connectionPort, { host })
-        .then((e: boolean) => {
-          setPortOpen(e);
-          return e;
-        })
-        .catch(() => {});
-      isPortReachable(hubConnectionPort, { host })
-        .then((e: boolean) => {
-          setHubPortOpen(e);
-          return e;
-        })
-        .catch(() => {});
-    }
-  }, [host]);
-
-  React.useEffect(() => {
     if (serverStart) {
       const waitForConnection = (timer: number) => {
         if (timer > 300000 && serverStart) {
@@ -95,13 +58,21 @@ const HostServer = () => {
           return;
         }
         if (
-          !outputLogRef.current.value.includes('Client Connection Received!')
+          !outputLogRef.current.value.includes('Received Connection from Peer!')
         ) {
           window.setTimeout(() => waitForConnection(timer + 1000), 1000);
         } else {
           sendProcessOutput(
             outputLogRef,
             connectChannel('system:capture_1', 'JackTrip:send_1')
+          );
+          sendProcessOutput(
+            outputLogRef,
+            connectChannel('JackTrip:receive_1', 'system:playback_1')
+          );
+          sendProcessOutput(
+            outputLogRef,
+            connectChannel('JackTrip:receive_1', 'system:playback_2')
           );
           setConnected(true);
         }
@@ -166,38 +137,23 @@ const HostServer = () => {
             disabled
           />
         </div>
-        <ul className="is-size-7" style={{ marginTop: 10 }}>
-          <li>
-            Base port {connectionPort} open?{' '}
-            <PortStatusIcon status={portOpen} />
-          </li>
-          <li>
-            Hub port {hubConnectionPort} open?{' '}
-            <PortStatusIcon status={hubPortOpen} />
-          </li>
-        </ul>
-        {portOpen === false && (
-          <div className="has-text-danger is-size-7" style={{ marginTop: 10 }}>
-            <i className="fas fa-exclamation-circle" /> Port {connectionPort} is
-            not accessible. To run a JackTrip server that can be accessed
-            outside of your network, you must have this port open or forwarded.
-            See{' '}
-            <a
-              className="has-text-danger"
-              onClick={() => {
-                shell.openExternal(
-                  'https://en.wikipedia.org/wiki/Port_forwarding'
-                );
-              }}
-            >
-              this article
-            </a>{' '}
-            for help with port forwarding.
-          </div>
-        )}
+        <p className="help">
+          To host a server, UDP port {connectionPort} needs to be open to accept
+          connections from the internet. See{' '}
+          <u
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              shell.openExternal(
+                'https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/'
+              );
+            }}
+          >
+            this article
+          </u>{' '}
+          for help with port forwarding.
+        </p>
       </div>
       <div className="field">
-        <div className="label">Hub configuration</div>
         <label className="checkbox">
           <input
             checked={hub}
@@ -209,25 +165,15 @@ const HostServer = () => {
           Enable hub server
         </label>
         <p className="help">
-          Regular servers only host one-on-one connections. Hub servers can also
-          host 3 or more connections.
+          Hub servers can host jams of more than 2 people. Port{' '}
+          {hubConnectionPort} needs to be open, as well as subsequent ports{' '}
+          {hubConnectionPort + 1}, {hubConnectionPort + 2} ... depending on the
+          number of connections.
         </p>
-        {hubPortOpen === false && hub && (
-          <div className="has-text-danger is-size-7" style={{ marginTop: 10 }}>
-            <i className="fas fa-exclamation-circle" /> Port {hubConnectionPort}{' '}
-            is not accessible. To run in hub mode outside of your local network,
-            you will need to open ports {hubConnectionPort},{' '}
-            {hubConnectionPort + 1}, {hubConnectionPort + 2} ... and so on
-            depending on how many concurrent connections you hope to support.
-          </div>
-        )}
       </div>
 
       <div className="field ">
         <div className="label">Audio settings</div>
-        <div style={{ marginBottom: 10 }}>
-          Sample rate in (hertz) and buffer size (frames per period).
-        </div>
         <div className="control is-grouped">
           <div className="select">
             <select
@@ -264,7 +210,6 @@ const HostServer = () => {
         </p>
       </div>
 
-      <hr />
       {isValid && (
         <>
           <div className="box has-background-grey-lighter">
@@ -297,7 +242,7 @@ const HostServer = () => {
                 </button>
               </div>
             </div>
-            <p className="help">Send this code to the other side.</p>
+            <p className="help">Send this code to the other folks.</p>
           </div>
         </>
       )}

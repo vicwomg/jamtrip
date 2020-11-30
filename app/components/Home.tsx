@@ -10,11 +10,14 @@ import {
   jackLspPath,
   jackTripPath,
 } from '../constants/constants';
+import { killProcesses } from '../features/jackInterface';
 import ClientConnect from './Client';
 import HostServer from './HostServer';
 
+type Tab = 'CLIENT' | 'SERVER';
+
 const Home = () => {
-  const [tab, setTab] = React.useState<'CLIENT' | 'SERVER'>('CLIENT');
+  const [tab, setTab] = React.useState<Tab>('CLIENT');
   const [binariesExist, setBinariesExist] = React.useState<boolean>(true);
 
   const requiredBinaries = [
@@ -31,18 +34,25 @@ const Home = () => {
     setBinariesExist(b);
   }, [requiredBinaries]);
 
+  const handleTabClick = (clickedTab: Tab) => {
+    if (clickedTab !== tab) {
+      killProcesses();
+      setTab(clickedTab);
+    }
+  };
+
   return (
     <div className="section">
       <div className="container" data-tid="container">
         <div className="tabs">
           <ul>
             <li className={tab === 'CLIENT' ? 'is-active' : ''}>
-              <a href="# " onClick={() => setTab('CLIENT')}>
+              <a href="# " onClick={() => handleTabClick('CLIENT')}>
                 Connect to a server
               </a>
             </li>
             <li className={tab === 'SERVER' ? 'is-active' : ''}>
-              <a href="# " onClick={() => setTab('SERVER')}>
+              <a href="# " onClick={() => handleTabClick('SERVER')}>
                 Host a server
               </a>
             </li>
