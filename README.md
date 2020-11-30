@@ -1,13 +1,14 @@
 # JamTrip
 
-A graphical user interface (GUI) front end for JackTrip and JACK, specifically for real-time internet music collaboration (AKA "jamming"). The goal is to be as simple to use as possible, since many musicians have had a hard time setting this up. JamTrip does not require launching multiple programs, configuring audio routes, or using the command line. It handles all of that for you. 
+A graphical user interface (GUI) front end for JackTrip and JACK, specifically for real-time internet music collaboration (AKA "jamming"). The goal is to be as simple to use as possible, since many musicians have had a hard time setting JackTrip up. By contrast, JamTrip does not require manually launching multiple programs, connecting audio routes, or using the command line. It handles all of that for you. 
 
 <div>
 <img src="https://user-images.githubusercontent.com/4107190/100566853-f2c07f00-327b-11eb-9e59-a3c42d260e89.jpg" align="left" width="320" >
 <img src="https://user-images.githubusercontent.com/4107190/100566861-f5bb6f80-327b-11eb-81f4-56156830659f.jpg" width="320" >
 </div>
 
-For more information about the amazing JackTrip project that makes this possible: https://ccrma.stanford.edu/software/jacktrip/
+For more information about the amazing JackTrip project that makes this possible: 
+https://ccrma.stanford.edu/software/jacktrip/
 
 ## Details
 
@@ -65,13 +66,11 @@ As a test, you can use the sample code listed under the "Example" field to conne
 
 ### Server mode
 
-For this to work, you need to have UDP port 4464 open and if using hub mode, additionally ports 61000, 61001 ... 61XXX (depending on how many connections you want to supprot). Regular servers are one-on-one connections. Hub mode allows 3 or more people to join. 
-
-For info on how to forward ports, this article is pretty good: https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/
-
 To host a JackTrip server, click the "Host a server" tab in the app, configure your audio (the defaults seem optimal in my testing) and click "Start Server". Then send the listed "connection code" to the other party and have them follow the instructions in the "Client mode" section.
 
 Once you're both connected, you should see the "connected!" indicator and you should both be able to hear each other!
+
+Note: For server hosting to work, you need to have UDP port 4464 open and if using hub mode, additionally ports 61000, 61001 ... 61XXX (depending on how many connections you want to support). Regular servers are one-on-one connections. Hub mode allows 3 or more people to join. For info on how to forward ports, this article is pretty good: https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/
 
 ## Building JamTrip
 
