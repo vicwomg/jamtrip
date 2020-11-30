@@ -2,13 +2,22 @@
 
 A graphical front-end for JackTrip and JACK that simplifies connecting two or more parties for realtime music collaboration over the internet. The goal is to simplify the process as much as possible. Many musicians have a hard time with the technical aspects of configuring JACK and JackTrip, and launching them from the command line.
 
-JamTrip makes the following assumptions:
+<div>
+<a href="url"><img src="https://user-images.githubusercontent.com/4107190/100566853-f2c07f00-327b-11eb-9e59-a3c42d260e89.jpg" align="left" width="320" ></a>
+<a href="url"><img src="https://user-images.githubusercontent.com/4107190/100566861-f5bb6f80-327b-11eb-81f4-56156830659f.jpg" width="320" ></a>
+</div>
 
-- You're on a reasonably new Mac with microphone or audio interface
+## Details
+
+In order to simplify things, JamTrip makes the following assumptions:
+
+- You're on a reasonably new computer with microphone or audio interface
 - You're using the default CoreAudio sound system on your Mac
 - Your desired sound input/output is selected from "System Preferences > Sound > Input/Output"
 - You're sending only one channel of audio
 - Audio mix is mono
+
+More exotic setups such as wanting to send multiple input channels and stereo mixes and other kinds of routing would probably be better suited for using JACK and JackTrip directly for now, but can possibly be added as configuration options later.
 
 PC support shouldn't be far behind once the kinks are ironed out.
 
@@ -37,6 +46,7 @@ JackTrip is the network protocol that allows audio signals from JACK to be sent 
 ### Install JamTrip
 
 - Download / install the latest JamTrip from: https://github.com/vicwomg/jamtrip/releases
+- Launch the app, you might have to do that whole security warning song and dance again.
 
 ### Configure your hardware and sound settings
 
@@ -45,16 +55,24 @@ JackTrip is the network protocol that allows audio signals from JACK to be sent 
 
 ## Usage
 
-- Double-click the JamTrip icon to launch the app.
-- To connect to a JackTrip server, enter the "connection code" you get from the person hosting the server. You can use the sample code listed under the "Example" field to connect to Stanford's test servers. You should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should be able to connect to any hosted JackTrip server.
-- To host a JackTrip server, click the "Host a server" tab in the app, configure your audio settings and click "Start Server". Then send the listed "connection code" to the other party.
+### Client mode
+
+To connect to a JackTrip server, enter the "connection code" you get from the person hosting the server. You can use the sample code listed under the "Example" field to connect to Stanford's test servers. You should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should theoretically be able to connect to any hosted JackTrip server.
+
+### Server mode
+
+To host a JackTrip server, click the "Host a server" tab in the app, configure your audio settings and click "Start Server". Then send the listed "connection code" to the other party and have them follow the instructions in the "Client mode" section.
+
+For this to work, you need to have UDP port 4464 open and if using hub mode, additionally 61000, 61001 ... 61XXX. 
+
+For info on how to forward ports, this article is pretty good: https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/
 
 ## Building JamTrip
 
-Install yarn: https://classic.yarnpkg.com/en/docs/install/
+Only necessary if you want to contribute to this project:
 
-Clone this project and cd into its directory.
-
+- Install yarn: https://classic.yarnpkg.com/en/docs/install/
+- Clone this project and cd into its directory.
 Then run:
 
 ```
