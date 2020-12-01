@@ -2,7 +2,7 @@
 
 A graphical user interface (GUI) front end for JackTrip and JACK, specifically for real-time internet music collaboration (AKA "jamming").
 
-The goal is to be as simple to use as possible, since many musicians have had a hard time setting JackTrip up. By contrast, JamTrip does not require manually launching multiple programs, configuring them, connecting audio routes, or using the command line. It handles all of that for you in one single app.
+The goal is to be as simple to use as possible, since many musicians have had a hard time setting JackTrip up. By contrast, JamTrip does not require manually launching multiple programs, configuring them, connecting audio routes, nor using the command line. It handles all of that for you in one single app.
 
 Check out [CCRMA](https://ccrma.stanford.edu/software/jacktrip/) for more information about the amazing JackTrip project that makes this possible.
 
@@ -13,16 +13,18 @@ Check out [CCRMA](https://ccrma.stanford.edu/software/jacktrip/) for more inform
 
 ## Requirements
 
-- JamTrip is only working on Mac OSX at the moment.
-- A microphone (built-in mic should work fine) and headphones
+- JamTrip is only working on Mac OSX and Windows 10 at the moment.
+- A microphone (built-in mic should work fine in a pinch) and headphones. Ideally a pro audio interface.
 - You will need an ethernet cable connection to your router. WiFi drops out too much to work right, though you can certainly try as proof-of-concept.
 - Ideally, you're within 200 miles of the other folks you're jamming with, otherwise you start to run into limitations from the laws of physics.
 
 ## Installation
 
-### Install JACK
+### Install JACK and other packages
 
-JACK is software for routing your audio channels to various destinations. In this case, it is used to send your audio inputs to your headphones and over the internet (with JackTrip).
+JACK is software for routing your audio channels to various destinations. In this case, it is used to send your audio inputs to your headphones and over the internet (using JackTrip).
+
+#### OSX
 
 - The version that is available on the jackaudio.org web site does not work with recent versions of OS X. Download a beta version that works with El Capitan and later [here](https://ccrma.stanford.edu/software/jacktrip/osx/JackOSX.0.92_b3.pkg)
 - Double click on the .pkg file to install
@@ -31,22 +33,26 @@ JACK is software for routing your audio channels to various destinations. In thi
 - Click the "General" button and click "Open Anyway" towards the bottom, where it lists the blocked package.
 - Then click "Open" in the next security confirmation window to complete the installation.
 
+#### Windows 
+- Install JACK from here: https://jackaudio.org/downloads/
+- Install ASIO 4 All from here: http://www.asio4all.org
+
 ### Install JamTrip
 
-- Download / install the latest JamTrip from: https://github.com/vicwomg/jamtrip/releases (click the "assets" dropdown to the get the .dmg file)
-- Click the dmg file to open an image of the executable app, and drag it to your Applications folder or Desktop
-- Double click it to launch the app, you might have to do that whole security warning song and dance again.
+- Download / install the latest JamTrip from: https://github.com/vicwomg/jamtrip/releases (click the "assets" dropdown to the get the .dmg or .exe file)
+- Open the installer or disk image and install as you normally would: __Mac__: by dragging the app into Applications. __Windows__: running the installer
+- Double click it to launch the app, __Mac__: you will have to do that whole "security warning" song and dance again to launch. __Windows__: puts a shortcut on the desktop.
 
 ### Configure your hardware and sound settings
 
 - Plug in any audio interfaces or microphones. You may also use the built-in microphone on your laptop
-- Under "System Preferences > Sound", click the "Input" tab and make sure the proper input device is selected, do the same for the "Output" tab (you probably want audio going to connected headphones, to avoid feedback)
+- __Mac__: Under "System Preferences > Sound", click the "Input" tab and make sure the proper input device is selected, do the same for the "Output" tab (you probably want audio going to connected headphones, to avoid feedback). __Windows__: open Settings > Sound Settings, and confirm that the Ouput and and Input devices are set to the proper hardware.
 
 ## Usage
 
 ### Client mode
 
-To connect to a JackTrip server, enter the "Connection code" you get from the person hosting the server and press "Connect". You may get a quick popup about enabling your microphone. Confirm that alert.
+To connect to a JackTrip server, enter the "Connection code" you get from the person hosting the server and press "Connect". __Mac__: You may get a quick popup about enabling your microphone. Confirm that alert. __Windows__: You will get a firewall warning, accept the connections it's requesting.
 
 As a test, you can use the sample code listed under the "Example" field to do a quick connecttion to Stanford's test servers: `jackloop128.stanford.edu_48000_128_h`. After connecting, you should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should technically be able to connect to any hosted JackTrip server.
 
@@ -82,13 +88,11 @@ This builds the platform executables into the ./release directory.
 In order to simplify setup, JamTrip makes the following assumptions:
 
 - You're on a reasonably new computer with microphone or audio interface
-- You're using the default CoreAudio sound system on your Mac
-- Your desired sound input/output is selected from "System Preferences > Sound > Input/Output"
+- You're using the default CoreAudio sound system on your Mac, or ASIO 4 All on Windows
+- Your desired sound input/output is selected from the OS's "Settings > Sound > Input/Output"
 - You're sending only one channel of audio, probably a microphone
 - Audio mix is mono
 
 More exotic setups such as wanting to send multiple input channels and stereo mixes and other kinds of routing would probably be better suited for using JACK and JackTrip directly for now, but if there is enough interest can be added as new configuration options later.
-
-PC support shouldn't be far behind once the kinks are ironed out.
 
 Built in Electron + React
