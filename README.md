@@ -50,8 +50,9 @@ JackTrip is a program that allows high-quality audio signals from JACK to be sen
 
 ### Install JamTrip
 
-- Download / install the latest JamTrip from: https://github.com/vicwomg/jamtrip/releases
-- Launch the app, you might have to do that whole security warning song and dance again.
+- Download / install the latest JamTrip from: https://github.com/vicwomg/jamtrip/releases (click the "assets" dropdown to the get the .dmg file)
+- Click the dmg file to open an image of the executable app, and drag it to your Applications folder or Desktop
+- Double click it to launch the app, you might have to do that whole security warning song and dance again.
 
 ### Configure your hardware and sound settings
 
@@ -62,9 +63,11 @@ JackTrip is a program that allows high-quality audio signals from JACK to be sen
 
 ### Client mode
 
-To connect to a JackTrip server, enter the "Connection code" you get from the person hosting the server and press "Connect". 
+To connect to a JackTrip server, enter the "Connection code" you get from the person hosting the server and press "Connect". You may get a quick popup about enabling your microphone. Confirm that alert.
 
-As a test, you can use the sample code listed under the "Example" field to connect to Stanford's test servers: `jackloop128.stanford.edu_48000_128_h`. After connecting, you should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should technically be able to connect to any hosted JackTrip server.
+As a test, you can use the sample code listed under the "Example" field to do a quick connecttion to Stanford's test servers: `jackloop128.stanford.edu_48000_128_h`. After connecting, you should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should technically be able to connect to any hosted JackTrip server.
+
+Hit disconnect to disconnect from the server.
 
 ### Server mode
 
