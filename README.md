@@ -4,8 +4,6 @@ A graphical user interface (GUI) front end for JackTrip and JACK, specifically f
 
 The goal is to be as simple to use as possible, since many musicians have had a hard time setting JackTrip up. By contrast, JamTrip does not require manually launching multiple programs, configuring them, connecting audio routes, or using the command line. It handles all of that for you in one single app. 
 
-JamTrip is only working on Mac OSX at the moment.
-
 Check out [CCRMA](https://ccrma.stanford.edu/software/jacktrip/) for more information about the amazing JackTrip project that makes this possible.
 
 <div>
@@ -13,6 +11,12 @@ Check out [CCRMA](https://ccrma.stanford.edu/software/jacktrip/) for more inform
 <img src="https://user-images.githubusercontent.com/4107190/100566861-f5bb6f80-327b-11eb-81f4-56156830659f.jpg" width="320" >
 </div>
 
+## Requirements
+
+- JamTrip is only working on Mac OSX at the moment. 
+- A microphone (built-in mic should work fine) and headphones
+- You will need an ethernet cable connection to your router. WiFi drops out too much to work right, though you can certainly try as proof-of-concept.
+- Ideally, you're within 200 miles of the other folks you're jamming with, otherwise you start to run into limitations from the laws of physics.
 
 ## Installation
 
