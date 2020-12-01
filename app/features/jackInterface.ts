@@ -48,6 +48,10 @@ export const connectChannel = (source: string, destination: string) => {
 };
 
 export const killProcesses = () => {
+  if (process.platform === 'win32') {
+    spawnSync('Taskkill', ['/IM', 'jackd.exe', '/F']);
+    spawnSync('Taskkill', ['/IM', 'jacktrip.exe', '/F']);
+  }
   spawnSync('killall', ['jackdmp']);
   spawnSync('killall', ['jacktrip']);
 };
