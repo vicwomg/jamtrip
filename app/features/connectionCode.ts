@@ -1,4 +1,4 @@
-const generateConnectionCode = (
+export const generateConnectionCode = (
   host: string,
   sampleRate: number | string,
   bufferSize: number | string,
@@ -8,4 +8,15 @@ const generateConnectionCode = (
   return `${host}_${sampleRate}_${bufferSize}_${hubString}`;
 };
 
-export default generateConnectionCode;
+export const decodeConnectionCode = (code: string) => {
+  const params = code.split('_');
+  if (params.length === 4) {
+    return {
+      host: params[0],
+      sampleRate: params[1],
+      bufferSize: params[2],
+      hub: params[3] === 'h',
+    };
+  }
+  return null;
+};

@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { bufferSizes, sampleRates } from '../constants/constants';
+import { decodeConnectionCode } from '../features/connectionCode';
 import {
   connectChannel,
   isJackServerRunning,
@@ -42,17 +43,21 @@ const ClientConnect = () => {
     });
   }, []);
 
-  React.useEffect(() => {
-    const params = connectionCode.split('_');
-    if (params.length === 4) {
-      setHost(params[0]);
-      setSampleRate(params[1]);
-      setBufferSize(params[2]);
-      setHub(params[3] === 'h');
+  const processCode = () => {
+    const decoded = decodeConnectionCode(connectionCode);
+    if (decoded) {
+      setHost(decoded.host);
+      setSampleRate(decoded.sampleRate);
+      setBufferSize(decoded.bufferSize);
+      setHub(decoded.hub);
       setPersistence('connection_code', connectionCode);
     } else {
       clearSettings();
     }
+  };
+
+  React.useEffect(() => {
+    processCode();
   }, [connectionCode]);
 
   const outputElement = React.useRef(null);
@@ -137,9 +142,10 @@ const ClientConnect = () => {
   };
 
   const handleToggleManualConf = () => {
-    clearSettings();
-    codeInputElement.current.value = '';
-    setConnectionCode('');
+    if (manualConnect) {
+      clearSettings();
+      processCode();
+    }
     setManualConnect(!manualConnect);
   };
 
@@ -186,6 +192,7 @@ const ClientConnect = () => {
             <div className="control">
               <input
                 type="text"
+                value={host}
                 className="input"
                 onChange={(e) => setHost(e.currentTarget.value)}
               />

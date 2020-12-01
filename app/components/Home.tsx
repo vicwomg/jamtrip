@@ -81,10 +81,10 @@ const Home = () => {
           </div>
         ) : (
           <>
-            <div className={tab !== 'CLIENT' ? 'is-hidden' : ''}>
+            <div className={tab === 'CLIENT' ? '' : 'is-hidden'}>
               <ClientConnect />
             </div>
-            <div className={tab !== 'SERVER' ? 'is-hidden' : ''}>
+            <div className={tab === 'SERVER' ? '' : 'is-hidden'}>
               <HostServer />
             </div>
           </>

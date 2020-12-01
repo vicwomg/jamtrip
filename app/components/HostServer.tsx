@@ -5,12 +5,13 @@ import { shell } from 'electron';
 import publicIp from 'public-ip';
 import React from 'react';
 import {
+  bitResolution,
   bufferSizes,
   connectionPort,
   hubConnectionPort,
   sampleRates,
 } from '../constants/constants';
-import generateConnectionCode from '../features/connectionCode';
+import { generateConnectionCode } from '../features/connectionCode';
 import {
   connectChannel,
   isJackServerRunning,
@@ -27,10 +28,13 @@ const HostServer = () => {
   const [host, setHost] = React.useState<string>('');
   const [sampleRate, setSampleRate] = React.useState<string>('48000');
   const [bufferSize, setBufferSize] = React.useState<string>('128');
+  const [queueLength, setQueueLength] = React.useState<string>('4');
+  const [bits, setBits] = React.useState<string>('16');
   const [hub, setHub] = React.useState<boolean>(false);
 
   const [serverStart, setServerStart] = React.useState<boolean>(false);
   const [connected, setConnected] = React.useState<boolean>(false);
+  const [codeCopied, setCodeCopied] = React.useState<boolean>(false);
 
   const connectionCodeRef = React.useRef(null);
   const outputLogRef = React.useRef(null);
@@ -42,6 +46,12 @@ const HostServer = () => {
     });
     getPersistence('server_buffer_size', (value) => {
       setBufferSize(value);
+    });
+    getPersistence('server_bit_resolution', (value) => {
+      setBits(value);
+    });
+    getPersistence('server_queue_length', (value) => {
+      setQueueLength(value);
     });
     getPersistence('server_hub', (value) => {
       setHub(value === 'true');
@@ -112,7 +122,7 @@ const HostServer = () => {
       if (!isJackServerRunning()) {
         window.setTimeout(() => waitForJackServer(timer + 500), 500);
       } else {
-        const jacktrip = startJackTripServer(hub);
+        const jacktrip = startJackTripServer(hub, queueLength, bits);
         sendProcessOutput(outputLogRef, jacktrip);
         setTimeout(() => {
           sendProcessOutput(
@@ -150,9 +160,22 @@ const HostServer = () => {
             disabled
           />
         </div>
+        <label className="checkbox" style={{ marginTop: 10 }}>
+          <input
+            checked={hub}
+            onChange={() => {
+              const r = !hub;
+              setPersistence('server_hub', r, () => setHub(r));
+            }}
+            type="checkbox"
+          />{' '}
+          Enable hub server (for 3 or more people)
+        </label>
         <p className="help">
-          To host a server, UDP port {connectionPort} needs to be open to accept
-          connections from the internet. See{' '}
+          To host a server, UDP port {connectionPort} needs to be open to the
+          internet. For hub mode, also ports {hubConnectionPort},{' '}
+          {hubConnectionPort + 1}, {hubConnectionPort + 2} ... depending on max
+          number of connections. See{' '}
           <u
             style={{ cursor: 'pointer' }}
             onClick={() => {
@@ -164,25 +187,6 @@ const HostServer = () => {
             this article
           </u>{' '}
           for help with port forwarding.
-        </p>
-      </div>
-      <div className="field">
-        <label className="checkbox">
-          <input
-            checked={hub}
-            onChange={() => {
-              const r = !hub;
-              setPersistence('server_hub', r, () => setHub(r));
-            }}
-            type="checkbox"
-          />{' '}
-          Enable hub server
-        </label>
-        <p className="help">
-          Hub servers can host jams of more than 2 people. Port{' '}
-          {hubConnectionPort} needs to be open, as well as subsequent ports{' '}
-          {hubConnectionPort + 1}, {hubConnectionPort + 2} ... depending on the
-          number of connections.
         </p>
       </div>
 
@@ -226,8 +230,52 @@ const HostServer = () => {
         </div>
         <p className="help">
           Decreasing buffer size lowers latency but may introduce audio
-          glitches.
+          glitches. Default: 48000/128
         </p>
+      </div>
+
+      <div className="field ">
+        <div className="label">Advanced</div>
+        <div className="is-flex" style={{ alignItems: 'center' }}>
+          <input
+            className="input is-small"
+            type="number"
+            value={queueLength}
+            style={{ width: 60 }}
+            onChange={(b) => {
+              const r = b.currentTarget.value;
+              setPersistence('server_queue_length', r, () => setQueueLength(r));
+            }}
+          />
+          <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+            <b>Queue buffer length</b> in packet size. If your connection is
+            very unstable, with a lot of jitter, increase this number at the
+            expense of a higher latency. Default: 4
+          </p>
+        </div>
+        <div className="is-flex" style={{ alignItems: 'center', marginTop: 5 }}>
+          <div className="select is-small" style={{}}>
+            <select
+              value={bits}
+              onChange={(b) => {
+                const r = b.currentTarget.value;
+                setPersistence('server_bit_resolution', r, () => setBits(r));
+              }}
+            >
+              <option disabled>Bits</option>
+              {bitResolution.map((e) => (
+                <option key={e} value={e}>
+                  {e}
+                </option>
+              ))}
+            </select>
+          </div>
+          <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+            <b>Audio bit rate resolution</b> can be used to decrease (or
+            increase) the bandwidth requirements, at the expense of a lower
+            audio quality. Default: 16
+          </p>
+        </div>
       </div>
 
       {isValid && (
@@ -256,10 +304,14 @@ const HostServer = () => {
                   onClick={() => {
                     connectionCodeRef.current.select();
                     document.execCommand('copy');
+                    setCodeCopied(true);
+                    setTimeout(() => {
+                      setCodeCopied(false);
+                    }, 2000);
                   }}
                 >
                   <i className="fas fa-copy" />
-                  &nbsp;copy
+                  &nbsp;{codeCopied ? 'copied!' : 'copy'}
                 </button>
               </div>
             </div>

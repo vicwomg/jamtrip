@@ -29,8 +29,18 @@ export const startJackTripClient = (host: string, hub: boolean) => {
   return spawn(jackTripPath, [hub ? '-C' : '-c', host]);
 };
 
-export const startJackTripServer = (hub: boolean) => {
-  return spawn(jackTripPath, [hub ? '-S' : '-s']);
+export const startJackTripServer = (
+  hub: boolean,
+  queueBuffer: string,
+  bits: string
+) => {
+  return spawn(jackTripPath, [
+    hub ? '-S' : '-s',
+    '-q',
+    queueBuffer,
+    '-b',
+    bits,
+  ]);
 };
 
 export const connectChannel = (source: string, destination: string) => {
