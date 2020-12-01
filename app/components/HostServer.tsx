@@ -172,10 +172,9 @@ const HostServer = () => {
           Enable hub server (for 3 or more people)
         </label>
         <p className="help">
-          To host a server, UDP port {connectionPort} needs to be open to the
-          internet. For hub mode, also ports {hubConnectionPort},{' '}
-          {hubConnectionPort + 1}, {hubConnectionPort + 2} ... depending on max
-          number of connections. See{' '}
+          Servers require UDP port {connectionPort} to be open to the internet.
+          Hub mode also needs ports {hubConnectionPort}, {hubConnectionPort + 1}
+          , {hubConnectionPort + 2}... for each connection. See{' '}
           <u
             style={{ cursor: 'pointer' }}
             onClick={() => {
