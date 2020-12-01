@@ -4,12 +4,7 @@
 import { shell } from 'electron';
 import fs from 'fs';
 import React from 'react';
-import {
-  jackConnectPath,
-  jackDmpPath,
-  jackLspPath,
-  jackTripPath,
-} from '../constants/constants';
+import { paths } from '../constants/constants';
 import ClientConnect from './Client';
 import HostServer from './HostServer';
 
@@ -20,10 +15,10 @@ const Home = () => {
   const [binariesExist, setBinariesExist] = React.useState<boolean>(true);
 
   const requiredBinaries = [
-    jackTripPath,
-    jackConnectPath,
-    jackDmpPath,
-    jackLspPath,
+    paths.jackTrip,
+    paths.jackConnect,
+    paths.jackDmp,
+    paths.jackLsp,
   ];
 
   React.useEffect(() => {

@@ -1,32 +1,32 @@
 import { spawn, spawnSync } from 'child_process';
-import {
-  jackConnectPath,
-  jackDmpPath,
-  jackLspPath,
-  jackTripPath,
-} from '../constants/constants';
+import { paths } from '../constants/constants';
+
+const getDeviceParams = () => {
+  switch (process.platform) {
+    case 'win32':
+      return ['-d', 'portaudio', '-d', 'ASIO::ASIO4ALL v2'];
+    case 'darwin':
+      return ['-d', 'coreaudio'];
+    default:
+      return [];
+  }
+};
 
 export const startJackdmp = (bufferSize: string, sampleRate: string) => {
-  return spawn(jackDmpPath, [
-    '-d',
-    'coreaudio',
-    '-o',
-    '2',
-    '-p',
-    bufferSize,
-    '-r',
-    sampleRate,
-  ]);
+  return spawn(
+    paths.jackDmp,
+    getDeviceParams().concat(['-o', '2', '-p', bufferSize, '-r', sampleRate])
+  );
 };
 
 export const isJackServerRunning = () => {
   // jack_lsp will return an error if jack server isn't running
-  const proc = spawnSync(jackLspPath);
+  const proc = spawnSync(paths.jackLsp);
   return proc.status === 0;
 };
 
 export const startJackTripClient = (host: string, hub: boolean) => {
-  return spawn(jackTripPath, [hub ? '-C' : '-c', host]);
+  return spawn(paths.jackTrip, [hub ? '-C' : '-c', host]);
 };
 
 export const startJackTripServer = (
@@ -34,7 +34,7 @@ export const startJackTripServer = (
   queueBuffer: string,
   bits: string
 ) => {
-  return spawn(jackTripPath, [
+  return spawn(paths.jackTrip, [
     hub ? '-S' : '-s',
     '-q',
     queueBuffer,
@@ -44,7 +44,7 @@ export const startJackTripServer = (
 };
 
 export const connectChannel = (source: string, destination: string) => {
-  return spawn(jackConnectPath, [source, destination]);
+  return spawn(paths.jackConnect, [source, destination]);
 };
 
 export const killProcesses = () => {
