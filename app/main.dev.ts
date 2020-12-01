@@ -70,7 +70,7 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 600,
+    width: 550,
     height: 675,
     icon: getAssetPath('icon.png'),
     webPreferences:
@@ -78,9 +78,11 @@ const createWindow = async () => {
         process.env.E2E_BUILD === 'true') &&
       process.env.ERB_SECURE !== 'true'
         ? {
+            enableRemoteModule: true,
             nodeIntegration: true,
           }
         : {
+            enableRemoteModule: true,
             preload: path.join(__dirname, 'dist/renderer.prod.js'),
           },
   });

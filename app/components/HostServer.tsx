@@ -18,6 +18,7 @@ import {
   startJackdmp,
   startJackTripServer,
 } from '../features/jackInterface';
+import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
 import ConnectionIndicator from './ConnectionIndicator';
 import LogButtons from './LogButtons';
@@ -27,8 +28,6 @@ const HostServer = () => {
   const [sampleRate, setSampleRate] = React.useState<string>('48000');
   const [bufferSize, setBufferSize] = React.useState<string>('128');
   const [hub, setHub] = React.useState<boolean>(false);
-  // const [portOpen, setPortOpen] = React.useState<boolean>();
-  // const [hubPortOpen, setHubPortOpen] = React.useState<boolean>();
 
   const [serverStart, setServerStart] = React.useState<boolean>(false);
   const [connected, setConnected] = React.useState<boolean>(false);
@@ -37,6 +36,18 @@ const HostServer = () => {
   const outputLogRef = React.useRef(null);
 
   React.useEffect(() => {
+    // load persisted values if they exist
+    getPersistence('server_sample_rate', (value) => {
+      setSampleRate(value);
+    });
+    getPersistence('server_buffer_size', (value) => {
+      setBufferSize(value);
+    });
+    getPersistence('server_hub', (value) => {
+      setHub(value === 'true');
+    });
+
+    // fetch external IP
     publicIp
       .v4()
       .then((ip) => {
@@ -58,6 +69,7 @@ const HostServer = () => {
           return;
         }
         if (
+          outputLogRef.current &&
           !outputLogRef.current.value.includes('Received Connection from Peer!')
         ) {
           window.setTimeout(() => waitForConnection(timer + 1000), 1000);
@@ -116,6 +128,7 @@ const HostServer = () => {
     };
     waitForJackServer(0);
   };
+
   const handleDisconnect = () => {
     killProcesses();
     setConnected(false);
@@ -157,8 +170,9 @@ const HostServer = () => {
         <label className="checkbox">
           <input
             checked={hub}
-            onClick={() => {
-              setHub(!hub);
+            onChange={() => {
+              const r = !hub;
+              setPersistence('server_hub', r, () => setHub(r));
             }}
             type="checkbox"
           />{' '}
@@ -178,7 +192,10 @@ const HostServer = () => {
           <div className="select">
             <select
               value={sampleRate}
-              onChange={(s) => setSampleRate(s.currentTarget.value)}
+              onChange={(s) => {
+                const r = s.currentTarget.value;
+                setPersistence('server_sample_rate', r, () => setSampleRate(r));
+              }}
             >
               <option value="" disabled>
                 Sample rate
@@ -193,7 +210,10 @@ const HostServer = () => {
           <div className="select" style={{ marginLeft: 10 }}>
             <select
               value={bufferSize}
-              onChange={(b) => setBufferSize(b.currentTarget.value)}
+              onChange={(b) => {
+                const r = b.currentTarget.value;
+                setPersistence('server_buffer_size', r, () => setBufferSize(r));
+              }}
             >
               <option disabled>Buffer size</option>
               {bufferSizes.map((e) => (
@@ -218,6 +238,7 @@ const HostServer = () => {
               <div className="control">
                 <input
                   className="input"
+                  readOnly
                   style={{ width: 300 }}
                   ref={connectionCodeRef}
                   value={generateConnectionCode(

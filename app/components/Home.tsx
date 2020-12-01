@@ -10,7 +10,6 @@ import {
   jackLspPath,
   jackTripPath,
 } from '../constants/constants';
-import { killProcesses } from '../features/jackInterface';
 import ClientConnect from './Client';
 import HostServer from './HostServer';
 
@@ -36,7 +35,6 @@ const Home = () => {
 
   const handleTabClick = (clickedTab: Tab) => {
     if (clickedTab !== tab) {
-      killProcesses();
       setTab(clickedTab);
     }
   };
@@ -83,8 +81,12 @@ const Home = () => {
           </div>
         ) : (
           <>
-            {tab === 'CLIENT' && <ClientConnect />}
-            {tab === 'SERVER' && <HostServer />}
+            <div className={tab !== 'CLIENT' ? 'is-hidden' : ''}>
+              <ClientConnect />
+            </div>
+            <div className={tab !== 'SERVER' ? 'is-hidden' : ''}>
+              <HostServer />
+            </div>
           </>
         )}
       </div>

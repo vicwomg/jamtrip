@@ -8,6 +8,7 @@ import {
   startJackdmp,
   startJackTripClient,
 } from '../features/jackInterface';
+import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
 import ConnectionIndicator from './ConnectionIndicator';
 import LogButtons from './LogButtons';
@@ -36,12 +37,19 @@ const ClientConnect = () => {
   };
 
   React.useEffect(() => {
+    getPersistence('connection_code', (value) => {
+      setConnectionCode(value);
+    });
+  }, []);
+
+  React.useEffect(() => {
     const params = connectionCode.split('_');
     if (params.length === 4) {
       setHost(params[0]);
       setSampleRate(params[1]);
       setBufferSize(params[2]);
       setHub(params[3] === 'h');
+      setPersistence('connection_code', connectionCode);
     } else {
       clearSettings();
     }
@@ -147,6 +155,7 @@ const ClientConnect = () => {
           <input
             type="text"
             className="input"
+            defaultValue={connectionCode}
             ref={codeInputElement}
             disabled={manualConnect}
             onChange={(e) => {
@@ -163,7 +172,9 @@ const ClientConnect = () => {
           <input
             type="checkbox"
             checked={manualConnect}
-            onClick={handleToggleManualConf}
+            onChange={() => {
+              handleToggleManualConf();
+            }}
           />{' '}
           Manual configuration
         </label>
@@ -187,7 +198,7 @@ const ClientConnect = () => {
               <label className="checkbox" style={{ marginTop: 10 }}>
                 <input
                   checked={hub}
-                  onClick={() => {
+                  onChange={() => {
                     setHub(!hub);
                   }}
                   type="checkbox"
