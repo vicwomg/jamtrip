@@ -44,14 +44,16 @@ export const startJackTripServer = (
 };
 
 export const connectChannel = (source: string, destination: string) => {
-  return spawn(paths.jackConnect, [source, destination]);
+  return spawnSync(paths.jackConnect, [source, destination]);
 };
 
 export const killProcesses = () => {
   if (process.platform === 'win32') {
-    spawnSync('Taskkill', ['/IM', 'jackd.exe', '/F']);
     spawnSync('Taskkill', ['/IM', 'jacktrip.exe', '/F']);
+    spawnSync('Taskkill', ['/IM', 'jack_connect.exe', '/F']);
+    spawnSync('Taskkill', ['/IM', 'jackd.exe', '/F']);
   }
-  spawnSync('killall', ['jackdmp']);
   spawnSync('killall', ['jacktrip']);
+  spawnSync('killall', ['jack_connect']);
+  spawnSync('killall', ['jackdmp']);
 };

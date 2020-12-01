@@ -84,18 +84,9 @@ const HostServer = () => {
         ) {
           window.setTimeout(() => waitForConnection(timer + 1000), 1000);
         } else {
-          sendProcessOutput(
-            outputLogRef,
-            connectChannel('system:capture_1', 'JackTrip:send_1')
-          );
-          sendProcessOutput(
-            outputLogRef,
-            connectChannel('JackTrip:receive_1', 'system:playback_1')
-          );
-          sendProcessOutput(
-            outputLogRef,
-            connectChannel('JackTrip:receive_1', 'system:playback_2')
-          );
+          connectChannel('system:capture_1', 'JackTrip:send_1');
+          connectChannel('JackTrip:receive_1', 'system:playback_1');
+          connectChannel('JackTrip:receive_1', 'system:playback_2');
           setConnected(true);
         }
       };

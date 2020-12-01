@@ -109,26 +109,11 @@ const ClientConnect = () => {
         const jacktrip = startJackTripClient(host, hub);
         sendProcessOutput(outputElement, jacktrip);
         setTimeout(() => {
-          sendProcessOutput(
-            outputElement,
-            connectChannel('system:capture_1', 'system:playback_1')
-          );
-          sendProcessOutput(
-            outputElement,
-            connectChannel('system:capture_1', 'system:playback_2')
-          );
-          sendProcessOutput(
-            outputElement,
-            connectChannel(`${host}:receive_1`, 'system:playback_1')
-          );
-          sendProcessOutput(
-            outputElement,
-            connectChannel(`${host}:receive_1`, 'system:playback_2')
-          );
-          sendProcessOutput(
-            outputElement,
-            connectChannel(`system:capture_1`, `${host}:send_1`)
-          );
+          connectChannel('system:capture_1', 'system:playback_1');
+          connectChannel('system:capture_1', 'system:playback_2');
+          connectChannel(`${host}:receive_1`, 'system:playback_1');
+          connectChannel(`${host}:receive_1`, 'system:playback_2');
+          connectChannel(`system:capture_1`, `${host}:send_1`);
         }, 2000);
       }
     };
