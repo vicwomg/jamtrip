@@ -12,22 +12,6 @@ The goal is to be as simple to use as possible, since many musicians have had a 
 For more information about the amazing JackTrip project that makes this possible: 
 https://ccrma.stanford.edu/software/jacktrip/
 
-## Details
-
-In order to simplify setup, JamTrip makes the following assumptions:
-
-- You're on a reasonably new computer with microphone or audio interface
-- You're using the default CoreAudio sound system on your Mac
-- Your desired sound input/output is selected from "System Preferences > Sound > Input/Output"
-- You're sending only one channel of audio, probably a microphone
-- Audio mix is mono
-
-More exotic setups such as wanting to send multiple input channels and stereo mixes and other kinds of routing would probably be better suited for using JACK and JackTrip directly for now, but if there is enough interest can be added as new configuration options later.
-
-PC support shouldn't be far behind once the kinks are ironed out.
-
-Built in Electron + React
-
 ## Installation
 
 ### Install JACK
@@ -93,3 +77,19 @@ yarn package
 ```
 
 This builds the platform executables into the ./release directory.
+
+## Details
+
+In order to simplify setup, JamTrip makes the following assumptions:
+
+- You're on a reasonably new computer with microphone or audio interface
+- You're using the default CoreAudio sound system on your Mac
+- Your desired sound input/output is selected from "System Preferences > Sound > Input/Output"
+- You're sending only one channel of audio, probably a microphone
+- Audio mix is mono
+
+More exotic setups such as wanting to send multiple input channels and stereo mixes and other kinds of routing would probably be better suited for using JACK and JackTrip directly for now, but if there is enough interest can be added as new configuration options later.
+
+PC support shouldn't be far behind once the kinks are ironed out.
+
+Built in Electron + React
