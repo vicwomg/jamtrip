@@ -1,8 +1,8 @@
 # JamTrip
 
-A graphical user interface (GUI) front end for JackTrip and JACK, specifically for real-time internet music collaboration (AKA "jamming"). 
+A graphical user interface (GUI) front end for JackTrip and JACK, specifically for real-time internet music collaboration (AKA "jamming").
 
-The goal is to be as simple to use as possible, since many musicians have had a hard time setting JackTrip up. By contrast, JamTrip does not require manually launching multiple programs, configuring them, connecting audio routes, or using the command line. It handles all of that for you in one single app. 
+The goal is to be as simple to use as possible, since many musicians have had a hard time setting JackTrip up. By contrast, JamTrip does not require manually launching multiple programs, configuring them, connecting audio routes, or using the command line. It handles all of that for you in one single app.
 
 Check out [CCRMA](https://ccrma.stanford.edu/software/jacktrip/) for more information about the amazing JackTrip project that makes this possible.
 
@@ -13,7 +13,7 @@ Check out [CCRMA](https://ccrma.stanford.edu/software/jacktrip/) for more inform
 
 ## Requirements
 
-- JamTrip is only working on Mac OSX at the moment. 
+- JamTrip is only working on Mac OSX at the moment.
 - A microphone (built-in mic should work fine) and headphones
 - You will need an ethernet cable connection to your router. WiFi drops out too much to work right, though you can certainly try as proof-of-concept.
 - Ideally, you're within 200 miles of the other folks you're jamming with, otherwise you start to run into limitations from the laws of physics.
@@ -30,13 +30,6 @@ JACK is software for routing your audio channels to various destinations. In thi
 - Open Spotlight Search (CMD + space, or click the upper right magnifying glass icon), type "Security & Privacy" and launch. (Or System Preferences > Security & Privacy)
 - Click the "General" button and click "Open Anyway" towards the bottom, where it lists the blocked package.
 - Then click "Open" in the next security confirmation window to complete the installation.
-
-### Install JackTrip
-
-JackTrip is a program that allows high-quality audio signals from JACK to be sent across the intenet with low-latency.
-
-- If you are running macOS High Sierra, Mojave or Catalina, download the JackTrip 1.2.1 installer package [here]( https://ccrma.stanford.edu/software/jacktrip/osx/jacktrip-macos-installer-x64-1.2.1.pkg). On older OS X releases, download the JackTrip 1.1 installer [here](https://ccrma.stanford.edu/software/jacktrip/osx/JackTrip.pkg) (if you don't know which version you're on, click the apple icon in the upper left > About this mac)
-- You'll get the same security warnings, follow the same instructions above.
 
 ### Install JamTrip
 
@@ -75,7 +68,7 @@ Requires node js: https://nodejs.org/en/
 
 - Install yarn: https://classic.yarnpkg.com/en/docs/install/
 - Clone this project and cd into its directory.
-Then run:
+  Then run:
 
 ```
 yarn

@@ -4,7 +4,7 @@
 import { shell } from 'electron';
 import fs from 'fs';
 import React from 'react';
-import { paths } from '../constants/constants';
+import { paths } from '../features/jackInterface';
 import ClientConnect from './Client';
 import HostServer from './HostServer';
 
