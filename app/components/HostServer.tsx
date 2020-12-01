@@ -116,14 +116,8 @@ const HostServer = () => {
         const jacktrip = startJackTripServer(hub, queueLength, bits);
         sendProcessOutput(outputLogRef, jacktrip);
         setTimeout(() => {
-          sendProcessOutput(
-            outputLogRef,
-            connectChannel('system:capture_1', 'system:playback_1')
-          );
-          sendProcessOutput(
-            outputLogRef,
-            connectChannel('system:capture_1', 'system:playback_2')
-          );
+          connectChannel('system:capture_1', 'system:playback_1');
+          connectChannel('system:capture_1', 'system:playback_2');
         }, 2000);
       }
     };
