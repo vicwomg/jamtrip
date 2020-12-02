@@ -111,7 +111,11 @@ const ClientConnect = () => {
         const jacktrip = startJackTripClient(host, hub);
         sendProcessOutput(outputElement, jacktrip);
         setTimeout(() => {
-          configureInputMonitoring(true);
+          getPersistence('direct_input_monitoring', (value) => {
+            if (value === 'true') {
+              configureInputMonitoring(true);
+            }
+          });
           connectChannel(`${host}:receive_1`, 'system:playback_1');
           connectChannel(`${host}:receive_1`, 'system:playback_2');
           connectChannel(`system:capture_1`, `${host}:send_1`);

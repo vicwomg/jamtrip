@@ -13,6 +13,7 @@ import {
 } from '../constants/constants';
 import { generateConnectionCode } from '../features/connectionCode';
 import {
+  configureInputMonitoring,
   connectChannel,
   isJackServerRunning,
   killProcesses,
@@ -117,8 +118,11 @@ const HostServer = () => {
         const jacktrip = startJackTripServer(hub, queueLength, bits);
         sendProcessOutput(outputLogRef, jacktrip);
         setTimeout(() => {
-          connectChannel('system:capture_1', 'system:playback_1');
-          connectChannel('system:capture_1', 'system:playback_2');
+          getPersistence('direct_input_monitoring', (value) => {
+            if (value === 'true') {
+              configureInputMonitoring(true);
+            }
+          });
         }, 2000);
       }
     };
