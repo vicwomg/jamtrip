@@ -10,6 +10,7 @@ import {
   connectionPort,
   hubConnectionPort,
   sampleRates,
+  serverWaitForClientTimeout,
 } from '../constants/constants';
 import { generateConnectionCode } from '../features/connectionCode';
 import {
@@ -72,7 +73,7 @@ const HostServer = () => {
   React.useEffect(() => {
     if (serverStart) {
       const waitForConnection = (timer: number) => {
-        if (timer > 300000 && serverStart) {
+        if (timer > serverWaitForClientTimeout) {
           killProcesses();
           // eslint-disable-next-line no-alert
           alert(
@@ -82,14 +83,16 @@ const HostServer = () => {
         }
         if (
           outputLogRef.current &&
-          !outputLogRef.current.value.includes('Received Connection from Peer!')
+          outputLogRef.current.value.includes('Received Connection from Peer!')
         ) {
-          window.setTimeout(() => waitForConnection(timer + 1000), 1000);
-        } else {
+          console.log('Client connecte!');
           connectChannel('system:capture_1', 'JackTrip:send_1');
           connectChannel('JackTrip:receive_1', 'system:playback_1');
           connectChannel('JackTrip:receive_1', 'system:playback_2');
           setConnected(true);
+        } else {
+          console.log('waiting for client...');
+          window.setTimeout(() => waitForConnection(timer + 1000), 1000);
         }
       };
       waitForConnection(0);
@@ -140,134 +143,160 @@ const HostServer = () => {
 
   return (
     <>
-      <div className="field">
-        <div className="label">Server IP address</div>
-        <div className="control">
-          <input
-            className="input"
-            type="text"
-            value={host || 'loading...'}
-            disabled
-          />
-        </div>
-        <label className="checkbox" style={{ marginTop: 10 }}>
-          <input
-            checked={hub}
-            onChange={() => {
-              const r = !hub;
-              setPersistence('server_hub', r, () => setHub(r));
-            }}
-            type="checkbox"
-          />{' '}
-          Enable hub server (for 3 or more people)
-        </label>
-        <p className="help">
-          Servers require UDP port {connectionPort} to be open to the internet.
-          Hub mode also needs ports {hubConnectionPort}, {hubConnectionPort + 1}
-          , {hubConnectionPort + 2}... for each connection. See{' '}
-          <u
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-              shell.openExternal(
-                'https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/'
-              );
-            }}
-          >
-            this article
-          </u>{' '}
-          for help with port forwarding.
-        </p>
-      </div>
-
-      <div className="field ">
-        <div className="label">Audio settings</div>
-        <div className="control is-grouped">
-          <div className="select">
-            <select
-              value={sampleRate}
-              onChange={(s) => {
-                const r = s.currentTarget.value;
-                setPersistence('server_sample_rate', r, () => setSampleRate(r));
-              }}
-            >
-              <option value="" disabled>
-                Sample rate
-              </option>
-              {sampleRates.map((e) => (
-                <option key={e} value={e}>
-                  {e}hz
-                </option>
-              ))}
-            </select>
+      {!serverStart && (
+        <>
+          <div className="field">
+            <div className="label">Server IP address</div>
+            <div className="control">
+              <input
+                className="input"
+                type="text"
+                value={host || 'loading...'}
+                disabled
+              />
+            </div>
+            <label className="checkbox" style={{ marginTop: 10 }}>
+              <input
+                checked={hub}
+                onChange={() => {
+                  const r = !hub;
+                  setPersistence('server_hub', r, () => setHub(r));
+                }}
+                type="checkbox"
+              />{' '}
+              Enable hub server (for 3 or more people)
+            </label>
+            <p className="help">
+              Servers require UDP port {connectionPort} to be open to the
+              internet. Hub mode also needs ports {hubConnectionPort},{' '}
+              {hubConnectionPort + 1}, {hubConnectionPort + 2}... for each
+              connection. See{' '}
+              <u
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  shell.openExternal(
+                    'https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/'
+                  );
+                }}
+              >
+                this article
+              </u>{' '}
+              for help with port forwarding.
+            </p>
           </div>
-          <div className="select" style={{ marginLeft: 10 }}>
-            <select
-              value={bufferSize}
-              onChange={(b) => {
-                const r = b.currentTarget.value;
-                setPersistence('server_buffer_size', r, () => setBufferSize(r));
-              }}
-            >
-              <option disabled>Buffer size</option>
-              {bufferSizes.map((e) => (
-                <option key={e} value={e}>
-                  {e}fpp
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <p className="help">
-          Increasing sample rate lowers latency, but increases bandwidth use.
-          Not all sound hardware supports above 48khz. Decreasing buffer size
-          lowers latency but introduces more audio glitches. Default: 48000/256
-        </p>
-      </div>
 
-      <div className="field ">
-        <div className="label">Advanced</div>
-        <div className="is-flex" style={{ alignItems: 'center' }}>
-          <input
-            className="input is-small"
-            type="number"
-            value={queueLength}
-            style={{ width: 60 }}
-            onChange={(b) => {
-              const r = b.currentTarget.value;
-              setPersistence('server_queue_length', r, () => setQueueLength(r));
-            }}
-          />
-          <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
-            <b>Queue buffer length</b> in packet size. If your connection is
-            very unstable, with a lot of jitter, increase this number at the
-            expense of a higher latency. Default: 4
-          </p>
-        </div>
-        <div className="is-flex" style={{ alignItems: 'center', marginTop: 5 }}>
-          <div className="select is-small" style={{}}>
-            <select
-              value={bits}
-              onChange={(b) => {
-                const r = b.currentTarget.value;
-                setPersistence('server_bit_resolution', r, () => setBits(r));
-              }}
-            >
-              <option disabled>Bits</option>
-              {bitResolution.map((e) => (
-                <option key={e} value={e}>
-                  {e}
-                </option>
-              ))}
-            </select>
+          <div className="field ">
+            <div className="label">Audio settings</div>
+            <div className="control is-grouped">
+              <div className="select">
+                <select
+                  value={sampleRate}
+                  onChange={(s) => {
+                    const r = s.currentTarget.value;
+                    setPersistence('server_sample_rate', r, () =>
+                      setSampleRate(r)
+                    );
+                  }}
+                >
+                  <option value="" disabled>
+                    Sample rate
+                  </option>
+                  {sampleRates.map((e) => (
+                    <option key={e} value={e}>
+                      {e}hz
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="select" style={{ marginLeft: 10 }}>
+                <select
+                  value={bufferSize}
+                  onChange={(b) => {
+                    const r = b.currentTarget.value;
+                    setPersistence('server_buffer_size', r, () =>
+                      setBufferSize(r)
+                    );
+                  }}
+                >
+                  <option disabled>Buffer size</option>
+                  {bufferSizes.map((e) => (
+                    <option key={e} value={e}>
+                      {e}fpp
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <p className="help">
+              Increasing sample rate lowers latency, but increases bandwidth
+              use. Decreasing buffer size lowers latency but introduces more
+              audio glitches. Default: 48000hz / 256fpp
+            </p>
           </div>
-          <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
-            <b>Audio bit rate resolution</b> can be used to decrease (or
-            increase) the bandwidth requirements, at the expense of a lower
-            audio quality. Default: 16
-          </p>
-        </div>
-      </div>
 
+          <div className="field ">
+            <div className="label">Advanced</div>
+            <div className="is-flex" style={{ alignItems: 'center' }}>
+              <input
+                className="input is-small"
+                type="number"
+                value={queueLength}
+                style={{ width: 60 }}
+                onChange={(b) => {
+                  const r = b.currentTarget.value;
+                  setPersistence('server_queue_length', r, () =>
+                    setQueueLength(r)
+                  );
+                }}
+              />
+              <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+                <b>Queue buffer length</b> in packet size. If your connection is
+                very unstable, with a lot of jitter, increase this number at the
+                expense of a higher latency. Default: 4
+              </p>
+            </div>
+            <div
+              className="is-flex"
+              style={{ alignItems: 'center', marginTop: 5 }}
+            >
+              <div className="select is-small" style={{}}>
+                <select
+                  value={bits}
+                  onChange={(b) => {
+                    const r = b.currentTarget.value;
+                    setPersistence('server_bit_resolution', r, () =>
+                      setBits(r)
+                    );
+                  }}
+                >
+                  <option disabled>Bits</option>
+                  {bitResolution.map((e) => (
+                    <option key={e} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+                <b>Audio bit rate resolution</b> can be used to decrease (or
+                increase) the bandwidth requirements, at the expense of a lower
+                audio quality. Default: 16
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+      {serverStart && (
+        <>
+          <div className="label">Server details</div>
+          <div className="is-size-7" style={{ marginBottom: 10 }}>
+            <b>Host</b>: {host} | <b>Hub</b>: {hub.toString()} <br />
+            <b>Sample rate</b>: {sampleRate} hz | <b>Buffer size</b>:{' '}
+            {bufferSize} fpp <br /> <b>Queue length</b>: {queueLength} |{' '}
+            <b>Bit resolution</b>: {bits} bits
+          </div>
+        </>
+      )}
       {isValid && (
         <>
           <div className="box has-background-grey-lighter">
@@ -312,6 +341,7 @@ const HostServer = () => {
           </div>
         </>
       )}
+
       {!serverStart ? (
         <div className="pulled-right">
           <button

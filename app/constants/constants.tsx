@@ -4,3 +4,5 @@ export const bitResolution = [8, 16, 24, 32];
 
 export const connectionPort = 4464;
 export const hubConnectionPort = 61000;
+
+export const serverWaitForClientTimeout = 300000;

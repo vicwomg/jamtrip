@@ -71,7 +71,7 @@ const createWindow = async () => {
   mainWindow = new BrowserWindow({
     show: false,
     width: 550,
-    height: 685,
+    height: 720,
     icon: getAssetPath('icon.png'),
     webPreferences:
       (process.env.NODE_ENV === 'development' ||
