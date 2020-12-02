@@ -10,7 +10,6 @@ import {
   connectionPort,
   hubConnectionPort,
   sampleRates,
-  serverWaitForClientTimeout,
 } from '../constants/constants';
 import { generateConnectionCode } from '../features/connectionCode';
 import {
@@ -39,8 +38,22 @@ const HostServer = () => {
   const [connected, setConnected] = React.useState<boolean>(false);
   const [codeCopied, setCodeCopied] = React.useState<boolean>(false);
 
+  const [pollJack, setPollJack] = React.useState<NodeJS.Timeout>();
+  const [pollConnection, setPollConnection] = React.useState<NodeJS.Timeout>();
+
   const connectionCodeRef = React.useRef(null);
   const outputLogRef = React.useRef(null);
+
+  const stopPolling = () => {
+    if (pollConnection) {
+      clearInterval(pollConnection);
+      setPollConnection(undefined);
+    }
+    if (pollJack) {
+      clearInterval(pollJack);
+      setPollJack(undefined);
+    }
+  };
 
   React.useEffect(() => {
     // load persisted values if they exist
@@ -68,36 +81,11 @@ const HostServer = () => {
         return null;
       })
       .catch(() => {});
+    return () => {
+      stopPolling();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  React.useEffect(() => {
-    if (serverStart) {
-      const waitForConnection = (timer: number) => {
-        if (timer > serverWaitForClientTimeout) {
-          killProcesses();
-          // eslint-disable-next-line no-alert
-          alert(
-            'Timed out waiting for connection to server. Check the log output.'
-          );
-          return;
-        }
-        if (
-          outputLogRef.current &&
-          outputLogRef.current.value.includes('Received Connection from Peer!')
-        ) {
-          console.log('Client connecte!');
-          connectChannel('system:capture_1', 'JackTrip:send_1');
-          connectChannel('JackTrip:receive_1', 'system:playback_1');
-          connectChannel('JackTrip:receive_1', 'system:playback_2');
-          setConnected(true);
-        } else {
-          console.log('waiting for client...');
-          window.setTimeout(() => waitForConnection(timer + 1000), 1000);
-        }
-      };
-      waitForConnection(0);
-    }
-  }, [serverStart]);
 
   const handleConnect = () => {
     killProcesses();
@@ -106,36 +94,45 @@ const HostServer = () => {
     const jackdmp = startJackdmp(bufferSize, sampleRate);
     sendProcessOutput(outputLogRef, jackdmp);
 
-    const waitForJackServer = (timer: number) => {
-      if (timer > 15000) {
-        killProcesses();
-        // eslint-disable-next-line no-alert
-        alert(
-          'Timed out waiting for JACK server to start. Check the log output'
-        );
-        return;
-      }
-      if (!isJackServerRunning()) {
-        window.setTimeout(() => waitForJackServer(timer + 500), 500);
-      } else {
+    const j = setInterval(() => {
+      if (isJackServerRunning()) {
+        // Start jacktrip after jack is confirmed running
+        // enable / disable input monitoring after jack launches
+        getPersistence('direct_input_monitoring', (value) => {
+          if (value === 'true') {
+            configureInputMonitoring(true);
+          }
+        });
         const jacktrip = startJackTripServer(hub, queueLength, bits);
         sendProcessOutput(outputLogRef, jacktrip);
-        setTimeout(() => {
-          getPersistence('direct_input_monitoring', (value) => {
-            if (value === 'true') {
-              configureInputMonitoring(true);
-            }
-          });
-        }, 2000);
+        clearInterval(j);
+        setPollJack(undefined);
       }
-    };
-    waitForJackServer(0);
+    }, 1000);
+    setPollJack(j);
+
+    // poll for connection success, and connect channels on success
+    const i = setInterval(() => {
+      if (
+        outputLogRef.current &&
+        outputLogRef.current.value.includes('Received Connection from Peer!')
+      ) {
+        connectChannel('system:capture_1', 'JackTrip:send_1');
+        connectChannel('JackTrip:receive_1', 'system:playback_1');
+        connectChannel('JackTrip:receive_1', 'system:playback_2');
+        setConnected(true);
+        clearInterval(i);
+        setPollConnection(undefined);
+      }
+    }, 1000);
+    setPollConnection(i);
   };
 
   const handleDisconnect = () => {
     killProcesses();
     setConnected(false);
     setServerStart(false);
+    stopPolling();
   };
 
   const isValid =
@@ -336,7 +333,7 @@ const HostServer = () => {
             </div>
             <p className="help">
               Send this code to the other folks. Note: the code changes if you
-              change audio settings.
+              modify audio settings.
             </p>
           </div>
         </>

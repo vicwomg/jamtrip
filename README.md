@@ -64,7 +64,7 @@ JACK is software for routing your audio channels to various destinations. In thi
 
 To connect to a JackTrip server, enter the "Connection code" you get from the person hosting the server and press "Connect". **Mac**: You may get a quick popup about enabling your microphone. Confirm that alert. **Windows**: You will get a firewall warning, accept the connections it's requesting.
 
-As a test, you can use the sample code listed under the "Example" field to do a quick connecttion to Stanford's test servers: `jackloop128.stanford.edu_48000_128_h`. After connecting, you should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should technically be able to connect to any hosted JackTrip server.
+As a test, you can use the sample code listed under the "Example" field to do a quick connecttion to Stanford's test servers: `jackloop256.stanford.edu_48000_256_h`. After connecting, you should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should technically be able to connect to any hosted JackTrip server.
 
 Hit disconnect to disconnect from the server.
 

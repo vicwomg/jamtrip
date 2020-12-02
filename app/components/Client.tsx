@@ -27,6 +27,9 @@ const ClientConnect = () => {
   const [connect, setConnect] = React.useState<boolean>(false);
   const [connected, setConnected] = React.useState<boolean>(false);
 
+  const [pollJack, setPollJack] = React.useState<NodeJS.Timeout>();
+  const [pollConnection, setPollConnection] = React.useState<NodeJS.Timeout>();
+
   const isValid =
     !!host && !!sampleRate && !!bufferSize && typeof hub === 'boolean';
 
@@ -39,10 +42,25 @@ const ClientConnect = () => {
     setHub(false);
   };
 
+  const stopPolling = () => {
+    if (pollConnection) {
+      clearInterval(pollConnection);
+      setPollConnection(undefined);
+    }
+    if (pollJack) {
+      clearInterval(pollJack);
+      setPollJack(undefined);
+    }
+  };
+
   React.useEffect(() => {
     getPersistence('connection_code', (value) => {
       setConnectionCode(value);
     });
+    return () => {
+      stopPolling();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const processCode = () => {
@@ -60,75 +78,57 @@ const ClientConnect = () => {
 
   React.useEffect(() => {
     processCode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionCode]);
 
-  const outputElement = React.useRef(null);
-
-  React.useEffect(() => {
-    if (connect) {
-      const waitForConnection = (timer: number) => {
-        if (timer > 30000 && connect) {
-          killProcesses();
-          // eslint-disable-next-line no-alert
-          alert(
-            'Timed out waiting for connection to server. Check the log output.'
-          );
-          return;
-        }
-        if (
-          !outputElement.current.value.includes(
-            'Received Connection from Peer!'
-          )
-        ) {
-          window.setTimeout(() => waitForConnection(timer + 1000), 1000);
-        } else {
-          setConnected(true);
-        }
-      };
-      waitForConnection(0);
-    }
-  }, [connect]);
+  const outputLogRef = React.useRef(null);
 
   const handleConnect = () => {
     killProcesses();
     setConnect(true);
 
     const jackdmp = startJackdmp(bufferSize, sampleRate);
-    sendProcessOutput(outputElement, jackdmp);
+    sendProcessOutput(outputLogRef, jackdmp);
 
-    const waitForJackServer = (timer: number) => {
-      if (timer > 15000) {
-        killProcesses();
-        // eslint-disable-next-line no-alert
-        alert(
-          'Timed out waiting for JACK server to start. Check the log output'
-        );
-        return;
-      }
-      if (!isJackServerRunning()) {
-        window.setTimeout(() => waitForJackServer(timer + 500), 500);
-      } else {
+    const j = setInterval(() => {
+      if (isJackServerRunning()) {
+        // Start jacktrip after jack is confirmed running
+        // enable / disable input monitoring after jack launches
+        getPersistence('direct_input_monitoring', (value) => {
+          if (value === 'true') {
+            configureInputMonitoring(true);
+          }
+        });
         const jacktrip = startJackTripClient(host, hub);
-        sendProcessOutput(outputElement, jacktrip);
-        setTimeout(() => {
-          getPersistence('direct_input_monitoring', (value) => {
-            if (value === 'true') {
-              configureInputMonitoring(true);
-            }
-          });
-          connectChannel(`${host}:receive_1`, 'system:playback_1');
-          connectChannel(`${host}:receive_1`, 'system:playback_2');
-          connectChannel(`system:capture_1`, `${host}:send_1`);
-        }, 2000);
+        sendProcessOutput(outputLogRef, jacktrip);
+        clearInterval(j);
+        setPollJack(undefined);
       }
-    };
-    waitForJackServer(0);
+    }, 1000);
+    setPollJack(j);
+
+    // poll for connection success, and connect channels on success
+    const i = setInterval(() => {
+      if (
+        outputLogRef.current &&
+        outputLogRef.current.value.includes('Received Connection from Peer!')
+      ) {
+        connectChannel(`${host}:receive_1`, 'system:playback_1');
+        connectChannel(`${host}:receive_1`, 'system:playback_2');
+        connectChannel(`system:capture_1`, `${host}:send_1`);
+        setConnected(true);
+        clearInterval(i);
+        setPollConnection(undefined);
+      }
+    }, 1000);
+    setPollConnection(i);
   };
 
   const handleDisconnect = () => {
     killProcesses();
     setConnect(false);
     setConnected(false);
+    stopPolling();
   };
 
   const handleToggleManualConf = () => {
@@ -162,7 +162,7 @@ const ClientConnect = () => {
               />
             </div>
             <p className="help">
-              <u>Example</u>: jackloop128.stanford.edu_48000_128_h
+              <u>Example</u>: jackloop256.stanford.edu_48000_256_h
             </p>
           </div>
           <div className="field">
@@ -267,6 +267,16 @@ const ClientConnect = () => {
         </div>
       ) : (
         <>
+          <>
+            <div className="label">Server details</div>
+            <div className="is-size-7" style={{ marginBottom: 10 }}>
+              <b>Host</b>: {host}&nbsp;&nbsp;&nbsp;<b>Hub</b>: {hub.toString()}{' '}
+              <br />
+              <b>Sample rate</b>: {sampleRate} hz&nbsp;&nbsp;&nbsp;
+              <b>Buffer size</b>: {bufferSize} fpp
+            </div>
+          </>
+          <hr />
           <div className="pulled-right">
             <InputMonitoringButton />
             <button
@@ -288,17 +298,17 @@ const ClientConnect = () => {
             <textarea
               className="textarea has-background-dark has-text-success is-size-7"
               name="output"
-              ref={outputElement}
+              ref={outputLogRef}
               id="output"
               rows={20}
               style={{ width: '100%' }}
             />
             <LogButtons
               onClear={() => {
-                outputElement.current.value = '';
+                outputLogRef.current.value = '';
               }}
               onCopy={() => {
-                outputElement.current.select();
+                outputLogRef.current.select();
                 document.execCommand('copy');
               }}
             />
