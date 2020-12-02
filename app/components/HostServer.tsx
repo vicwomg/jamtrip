@@ -287,10 +287,12 @@ const HostServer = () => {
         <>
           <div className="label">Server details</div>
           <div className="is-size-7" style={{ marginBottom: 10 }}>
-            <b>Host</b>: {host} | <b>Hub</b>: {hub.toString()} <br />
-            <b>Sample rate</b>: {sampleRate} hz | <b>Buffer size</b>:{' '}
-            {bufferSize} fpp <br /> <b>Queue length</b>: {queueLength} |{' '}
-            <b>Bit resolution</b>: {bits} bits
+            <b>Host</b>: {host}&nbsp;&nbsp;&nbsp;<b>Hub</b>: {hub.toString()}{' '}
+            <br />
+            <b>Sample rate</b>: {sampleRate} hz&nbsp;&nbsp;&nbsp;
+            <b>Buffer size</b>: {bufferSize} fpp <br /> <b>Queue length</b>:{' '}
+            {queueLength}&nbsp;&nbsp;&nbsp;
+            <b>Bits</b>: {bits}
           </div>
         </>
       )}
