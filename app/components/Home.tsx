@@ -17,6 +17,7 @@ const Home = () => {
   const requiredBinaries = [
     paths.jackTrip,
     paths.jackConnect,
+    paths.jackDisconnect,
     paths.jackDmp,
     paths.jackLsp,
   ];

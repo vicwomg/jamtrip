@@ -22,12 +22,13 @@ import {
 import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
 import ConnectionIndicator from './ConnectionIndicator';
+import InputMonitoringButton from './InputMonitoring';
 import LogButtons from './LogButtons';
 
 const HostServer = () => {
   const [host, setHost] = React.useState<string>('');
   const [sampleRate, setSampleRate] = React.useState<string>('48000');
-  const [bufferSize, setBufferSize] = React.useState<string>('128');
+  const [bufferSize, setBufferSize] = React.useState<string>('256');
   const [queueLength, setQueueLength] = React.useState<string>('4');
   const [bits, setBits] = React.useState<string>('16');
   const [hub, setHub] = React.useState<boolean>(false);
@@ -213,8 +214,9 @@ const HostServer = () => {
           </div>
         </div>
         <p className="help">
-          Decreasing buffer size lowers latency but may introduce audio
-          glitches. Default: 48000/128
+          Increasing sample rate lowers latency, but increases bandwidth use.
+          Not all sound hardware supports above 48khz. Decreasing buffer size
+          lowers latency but introduces more audio glitches. Default: 48000/256
         </p>
       </div>
 
@@ -299,7 +301,10 @@ const HostServer = () => {
                 </button>
               </div>
             </div>
-            <p className="help">Send this code to the other folks.</p>
+            <p className="help">
+              Send this code to the other folks. Note: the code changes if you
+              change audio settings.
+            </p>
           </div>
         </>
       )}
@@ -317,8 +322,10 @@ const HostServer = () => {
       ) : (
         <>
           <div className="pulled-right">
+            <InputMonitoringButton />
             <button
               type="button"
+              style={{ marginLeft: 10 }}
               onClick={handleDisconnect}
               className="button is-rounded is-danger"
             >

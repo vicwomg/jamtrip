@@ -14,6 +14,7 @@ const getJackPaths = () => {
     const basePath = 'C:\\Program Files (x86)\\Jack\\';
     return {
       jackConnect: `${basePath}jack_connect.exe`,
+      jackDisconnect: `${basePath}jack_disconnect.exe`,
       jackDmp: `${basePath}jackd.exe`,
       jackLsp: `${basePath}jack_lsp.exe`,
       jackTrip: path.join(BIN_PATH, 'win32', 'jacktrip.exe'),
@@ -25,6 +26,7 @@ const getJackPaths = () => {
     // versions older than high sierra (kernel 17.0.0.0) use jacktrip 1.1
     return {
       jackConnect: `${basePath}jack_connect`,
+      jackDisconnect: `${basePath}jack_disconnect`,
       jackDmp: `${basePath}jackdmp`,
       jackLsp: `${basePath}jack_lsp`,
       jackTrip: path.join(
@@ -39,6 +41,7 @@ const getJackPaths = () => {
   const basePath = '/usr/bin/';
   return {
     jackConnect: `${basePath}jack_connect`,
+    jackDisconnect: `${basePath}jack_disconnect`,
     jackDmp: `${basePath}jackdmp`,
     jackLsp: `${basePath}jack_lsp`,
     jackTrip: `${basePath}jacktrip`,
@@ -91,6 +94,20 @@ export const startJackTripServer = (
 
 export const connectChannel = (source: string, destination: string) => {
   return spawnSync(paths.jackConnect, [source, destination]);
+};
+
+export const disconnectChannel = (source: string, destination: string) => {
+  return spawnSync(paths.jackDisconnect, [source, destination]);
+};
+
+export const configureInputMonitoring = (inputMonitoring: boolean) => {
+  if (inputMonitoring) {
+    connectChannel('system:capture_1', 'system:playback_1');
+    connectChannel('system:capture_1', 'system:playback_2');
+  } else {
+    disconnectChannel('system:capture_1', 'system:playback_1');
+    disconnectChannel('system:capture_1', 'system:playback_2');
+  }
 };
 
 export const killProcesses = () => {

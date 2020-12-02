@@ -3,6 +3,7 @@ import React from 'react';
 import { bufferSizes, sampleRates } from '../constants/constants';
 import { decodeConnectionCode } from '../features/connectionCode';
 import {
+  configureInputMonitoring,
   connectChannel,
   isJackServerRunning,
   killProcesses,
@@ -12,6 +13,7 @@ import {
 import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
 import ConnectionIndicator from './ConnectionIndicator';
+import InputMonitoringButton from './InputMonitoring';
 import LogButtons from './LogButtons';
 
 const ClientConnect = () => {
@@ -109,8 +111,7 @@ const ClientConnect = () => {
         const jacktrip = startJackTripClient(host, hub);
         sendProcessOutput(outputElement, jacktrip);
         setTimeout(() => {
-          connectChannel('system:capture_1', 'system:playback_1');
-          connectChannel('system:capture_1', 'system:playback_2');
+          configureInputMonitoring(true);
           connectChannel(`${host}:receive_1`, 'system:playback_1');
           connectChannel(`${host}:receive_1`, 'system:playback_2');
           connectChannel(`system:capture_1`, `${host}:send_1`);
@@ -258,7 +259,9 @@ const ClientConnect = () => {
       ) : (
         <>
           <div className="pulled-right">
+            <InputMonitoringButton />
             <button
+              style={{ marginLeft: 10 }}
               type="button"
               onClick={handleDisconnect}
               className="button is-rounded is-danger"
