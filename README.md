@@ -21,7 +21,7 @@ Check out [CCRMA](https://ccrma.stanford.edu/software/jacktrip/) for more inform
 
 - JamTrip is only working on Mac OSX and Windows 10 at the moment.
 - A microphone (built-in mic should work fine in a pinch) and headphones. Ideally a pro audio interface.
-- You will need an ethernet cable connection to your router. WiFi drops out too much to work right, though you can certainly try as proof-of-concept. If you're on a laptop with no ethernet port, you can add one using a [USB to Ethernet adapter](https://www.amazon.com/uni-Ethernet-Internet-Compatible-Notebook/dp/B087QFQW6F) and an [ethernet cable](https://www.amazon.com/Ethernet-Cable-Meters-Network-Internet/dp/B00GBBSRKW/). Connect this directly to a free ethernet port on your wifi router.
+- You will need an ethernet cable connection to your router. WiFi drops out too much to work right, though you can certainly try as proof-of-concept. If you're on a laptop with no ethernet port, you can add one using a [USB to Ethernet adapter ($12.99)](https://www.amazon.com/TP-Link-Foldable-Gigabit-Ethernet-Compatible/dp/B00YUU3KC6/) and an [ethernet cable](https://www.amazon.com/Ethernet-Cable-Meters-Network-Internet/dp/B00GBBSRKW/). Connect this directly to a free ethernet port on your wifi router.
 - Ideally, you're within 200 miles of the other folks you're jamming with, otherwise you start to run into limitations from the laws of physics.
 
 ## Installation
