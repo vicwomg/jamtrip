@@ -64,13 +64,13 @@ const ClientConnect = () => {
   }, []);
 
   const processCode = () => {
-    const decoded = decodeConnectionCode(connectionCode);
+    const decoded = decodeConnectionCode(connectionCode.trim());
     if (decoded) {
       setHost(decoded.host);
       setSampleRate(decoded.sampleRate);
       setBufferSize(decoded.bufferSize);
       setHub(decoded.hub);
-      setPersistence('connection_code', connectionCode);
+      setPersistence('connection_code', connectionCode.trim());
     } else {
       clearSettings();
     }

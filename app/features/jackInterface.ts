@@ -32,7 +32,7 @@ const getJackPaths = () => {
       jackTrip: path.join(
         BIN_PATH,
         `/darwin/${
-          semver.gte(kernelVersion, '17.0.0') ? 'jacktrip' : 'jacktrip_1.1'
+          semver.gte(kernelVersion, '15.0.0') ? 'jacktrip' : 'jacktrip_1.1'
         }`
       ),
     };

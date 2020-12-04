@@ -20,9 +20,9 @@ Check out [CCRMA](https://ccrma.stanford.edu/software/jacktrip/) for more inform
 ## Requirements
 
 - JamTrip is only working on Mac OSX and Windows 10 at the moment.
-- A microphone (built-in mic should work fine in a pinch) and headphones. Ideally a pro audio interface.
-- You will need an ethernet cable connection to your router. WiFi drops out too much to work right, though you can certainly try as proof-of-concept. If you're on a laptop with no ethernet port, you can add one using a [USB to Ethernet adapter ($12.99)](https://www.amazon.com/TP-Link-Foldable-Gigabit-Ethernet-Compatible/dp/B00YUU3KC6/) and an [ethernet cable](https://www.amazon.com/Ethernet-Cable-Meters-Network-Internet/dp/B00GBBSRKW/). Connect this directly to a free ethernet port on your wifi router.
-- Ideally, you're within 200 miles of the other folks you're jamming with, otherwise you start to run into limitations from the laws of physics.
+- A microphone and headphones. Ideally these are running through a professional audio interface for lower latency, however a built-in laptop microphone works fine.
+- You will need an ethernet cable connection to your router. WiFi drops out too much to work right, though you can certainly try it with a high buffer side as proof-of-concept. If you're on a laptop with no ethernet port, you can add one using a [USB to Ethernet adapter (\$12.99)](https://www.amazon.com/TP-Link-Foldable-Gigabit-Ethernet-Compatible/dp/B00YUU3KC6/) and an [ethernet cable](https://www.amazon.com/Ethernet-Cable-Meters-Network-Internet/dp/B00GBBSRKW/). Connect this directly to a free ethernet port on your wifi router.
+- For best results, you're within 200 miles of the other folks you're jamming with, otherwise you start to run into latency limitations from the laws of physics.
 
 ## Installation
 
@@ -38,7 +38,7 @@ JACK is software for routing your audio channels to various destinations. In thi
 - Open Spotlight Search (CMD + space, or click the upper right magnifying glass icon), type "Security & Privacy" and launch. (Or System Preferences > Security & Privacy)
 - Click the "General" button and click "Open Anyway" towards the bottom, where it lists the blocked package.
 - Then click "Open" in the next security confirmation window to complete the installation.
-- It will want you to restart the machine.
+- It will want you to restart the machine, do that.
 
 #### Windows
 
@@ -48,21 +48,30 @@ JACK is software for routing your audio channels to various destinations. In thi
 ### Install JamTrip
 
 - Download / install the latest JamTrip from: https://github.com/vicwomg/jamtrip/releases (click the "assets" dropdown to the get the .dmg or .exe file)
-- Open the installer or disk image and install as you normally would: **Mac**: by dragging the app into Applications. **Windows**: running the installer
-- Double click it to launch the app, **Mac**: you will have to do that whole "security warning" song and dance again to launch. **Windows**: puts a shortcut on the desktop.
-
-**Older macs**: Saw this on El Capitan: you need to additionally "Allow apps downloaded from: Everywhere" under "Security & Privacy", otherwise it wont get past app verification.
+- Open the installer or disk image and install as you normally would:
+  - **Mac**: by dragging the app into Applications.
+  - **Windows**: running the installer
+- Double click it to launch the app
+  - **Mac**: you will have to do that whole "security warning" song and dance again to launch.
+  - **Older macs**: Saw this on El Capitan: you need to additionally "Allow apps downloaded from: Everywhere" under "Security & Privacy", otherwise it wont get past an app verification loop
+  - **Windows**: Installation puts a shortcut on the desktop.
 
 ### Configure your hardware and sound settings
 
 - Plug in any audio interfaces or microphones. You may also use the built-in microphone on your laptop
-- **Mac**: Under "System Preferences > Sound", click the "Input" tab and make sure the proper input device is selected, do the same for the "Output" tab (you probably want audio going to connected headphones, to avoid feedback). **Windows**: open Settings > Sound Settings, and confirm that the Ouput and and Input devices are set to the proper hardware.
+- Plug in headphones (running JamTrip over speakers is not recommended, due to feedback)
+- Confirm that your OS-level audio settings are correct:
+  - **Mac**: Under "System Preferences > Sound", click the "Input" tab and make sure the proper input device is selected, do the same for the "Output" tab
+  - **Windows**: open Windows 10's "Settings > Sound Settings" section, and confirm that the Ouput and and Input devices are set to the proper hardware.
 
 ## Usage
 
 ### Client mode
 
-To connect to a JackTrip server, enter the "Connection code" you get from the person hosting the server and press "Connect". **Mac**: You may get a quick popup about enabling your microphone. Confirm that alert. **Windows**: You will get a firewall warning, accept the connections it's requesting.
+To connect to a JackTrip server, enter the "Connection code" you get from the person hosting the server and press "Connect".
+
+- **Mac**: You may get a quick popup about enabling your microphone. Confirm that alert.
+- **Windows**: You will get a firewall warning, confirm it to allow the connections that it's requesting.
 
 As a test, you can use the sample code listed under the "Example" field to do a quick connecttion to Stanford's test servers: `jackloop256.stanford.edu_48000_256_h`. After connecting, you should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should technically be able to connect to any hosted JackTrip server.
 
