@@ -57,7 +57,7 @@ const getDeviceParams = () => {
     case 'darwin':
       return ['-d', 'coreaudio'];
     default:
-      return [];
+      return ['-d', 'alsa'];
   }
 };
 
