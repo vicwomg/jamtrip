@@ -42,7 +42,7 @@ JACK is software for routing your audio channels to various destinations. In thi
 
 #### Windows
 
-- Install JACK from here: https://jackaudio.org/downloads/
+- Install JACK from here: https://github.com/jackaudio/jackaudio.github.com/releases/download/1.9.11/Jack_v1.9.11_64_setup.exe (do NOT install the version from jackaudio.org, it is currently incompatible)
 - Install ASIO 4 All from here: http://www.asio4all.org
 
 ### Install JamTrip
