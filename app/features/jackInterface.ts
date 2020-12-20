@@ -61,11 +61,23 @@ const getDeviceParams = () => {
   }
 };
 
+const paramsToString = (params: string[]) => {
+  return params.toString().replaceAll(',', ' ');
+};
+
 export const startJackdmp = (bufferSize: string, sampleRate: string) => {
-  return spawn(
-    paths.jackDmp,
-    getDeviceParams().concat(['-o', '2', '-p', bufferSize, '-r', sampleRate])
-  );
+  const params = getDeviceParams().concat([
+    '-o',
+    '2',
+    '-p',
+    bufferSize,
+    '-r',
+    sampleRate,
+  ]);
+  return {
+    command: `** ${paths.jackDmp} ${paramsToString(params)}`,
+    process: spawn(paths.jackDmp, params),
+  };
 };
 
 export const isJackServerRunning = () => {
@@ -75,7 +87,11 @@ export const isJackServerRunning = () => {
 };
 
 export const startJackTripClient = (host: string, hub: boolean) => {
-  return spawn(paths.jackTrip, [hub ? '-C' : '-c', host]);
+  const params = [hub ? '-C' : '-c', host];
+  return {
+    command: `** ${paths.jackTrip} ${paramsToString(params)}`,
+    process: spawn(paths.jackTrip, params),
+  };
 };
 
 export const startJackTripServer = (
@@ -83,31 +99,41 @@ export const startJackTripServer = (
   queueBuffer: string,
   bits: string
 ) => {
-  return spawn(paths.jackTrip, [
-    hub ? '-S' : '-s',
-    '-q',
-    queueBuffer,
-    '-b',
-    bits,
-  ]);
+  const params = [hub ? '-S' : '-s', '-q', queueBuffer, '-b', bits];
+  return {
+    command: `** ${paths.jackTrip} ${paramsToString(params)}`,
+    process: spawn(paths.jackTrip, params),
+  };
 };
 
 export const connectChannel = (source: string, destination: string) => {
-  return spawnSync(paths.jackConnect, [source, destination]);
+  const result = spawnSync(paths.jackConnect, [source, destination]);
+  return `** Connecting '${source}' to '${destination}'.\n${
+    !!result.stderr && `stderr: ${result.stderr}`
+  }`;
 };
 
 export const disconnectChannel = (source: string, destination: string) => {
-  return spawnSync(paths.jackDisconnect, [source, destination]);
+  const result = spawnSync(paths.jackDisconnect, [source, destination]);
+  return `** Disconnecting '${source}' from '${destination}'.\n${!!result.stdout}${
+    result.stderr && `stderr: ${result.stderr}`
+  }`;
 };
 
 export const configureInputMonitoring = (inputMonitoring: boolean) => {
+  let output = '';
   if (inputMonitoring) {
-    connectChannel('system:capture_1', 'system:playback_1');
-    connectChannel('system:capture_1', 'system:playback_2');
+    output += `${connectChannel('system:capture_1', 'system:playback_1')}\n`;
+    output += `${connectChannel('system:capture_1', 'system:playback_2')}\n`;
+    output += `${connectChannel('system:capture_2', 'system:playback_1')}\n`;
+    output += `${connectChannel('system:capture_2', 'system:playback_2')}\n`;
   } else {
-    disconnectChannel('system:capture_1', 'system:playback_1');
-    disconnectChannel('system:capture_1', 'system:playback_2');
+    output += `${disconnectChannel('system:capture_1', 'system:playback_1')}\n`;
+    output += `${disconnectChannel('system:capture_1', 'system:playback_2')}\n`;
+    output += `${disconnectChannel('system:capture_2', 'system:playback_1')}\n`;
+    output += `${disconnectChannel('system:capture_2', 'system:playback_2')}\n`;
   }
+  return output;
 };
 
 export const killProcesses = () => {

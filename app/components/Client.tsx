@@ -1,4 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
+import { ChildProcessWithoutNullStreams } from 'child_process';
+import classnames from 'classnames';
 import React from 'react';
 import { bufferSizes, sampleRates } from '../constants/constants';
 import { decodeConnectionCode } from '../features/connectionCode';
@@ -8,7 +10,8 @@ import {
   isJackServerRunning,
   killProcesses,
   startJackdmp,
-  startJackTripClient,
+  // eslint-disable-next-line prettier/prettier
+  startJackTripClient
 } from '../features/jackInterface';
 import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
@@ -23,6 +26,7 @@ const ClientConnect = () => {
   const [hub, setHub] = React.useState<boolean>(false);
   const [connectionCode, setConnectionCode] = React.useState<string>('');
   const [manualConnect, setManualConnect] = React.useState<boolean>(false);
+  const [showLog, setShowLog] = React.useState<boolean>(false);
 
   const [connect, setConnect] = React.useState<boolean>(false);
   const [connected, setConnected] = React.useState<boolean>(false);
@@ -82,13 +86,20 @@ const ClientConnect = () => {
   }, [connectionCode]);
 
   const outputLogRef = React.useRef(null);
+  const sendLog = (output: string | ChildProcessWithoutNullStreams) => {
+    sendProcessOutput(outputLogRef, output);
+  };
 
   const handleConnect = () => {
     killProcesses();
+    setShowLog(true);
+    outputLogRef.current.value = '';
     setConnect(true);
 
     const jackdmp = startJackdmp(bufferSize, sampleRate);
-    sendProcessOutput(outputLogRef, jackdmp);
+
+    sendLog(jackdmp.command);
+    sendLog(jackdmp.process);
 
     const j = setInterval(() => {
       if (isJackServerRunning()) {
@@ -100,7 +111,8 @@ const ClientConnect = () => {
           }
         });
         const jacktrip = startJackTripClient(host, hub);
-        sendProcessOutput(outputLogRef, jacktrip);
+        sendLog(jacktrip.command);
+        sendLog(jacktrip.process);
         clearInterval(j);
         setPollJack(undefined);
       }
@@ -113,9 +125,11 @@ const ClientConnect = () => {
         outputLogRef.current &&
         outputLogRef.current.value.includes('Received Connection from Peer!')
       ) {
-        connectChannel(`${host}:receive_1`, 'system:playback_1');
-        connectChannel(`${host}:receive_1`, 'system:playback_2');
-        connectChannel(`system:capture_1`, `${host}:send_1`);
+        sendLog('** Connection established, patching channels...');
+        sendLog(connectChannel(`${host}:receive_1`, 'system:playback_1'));
+        sendLog(connectChannel(`${host}:receive_1`, 'system:playback_2'));
+        sendLog(connectChannel(`system:capture_1`, `${host}:send_1`));
+        sendLog(connectChannel(`system:capture_2`, `${host}:send_1`));
         setConnected(true);
         clearInterval(i);
         setPollConnection(undefined);
@@ -125,6 +139,7 @@ const ClientConnect = () => {
   };
 
   const handleDisconnect = () => {
+    sendLog('** Disconnecting...');
     killProcesses();
     setConnect(false);
     setConnected(false);
@@ -293,28 +308,30 @@ const ClientConnect = () => {
             standbyMessage="connecting to server..."
             successMessage="connected!"
           />
-          <div className="field">
-            <div className="label">Log output</div>
-            <textarea
-              className="textarea has-background-dark has-text-success is-size-7"
-              name="output"
-              ref={outputLogRef}
-              id="output"
-              rows={20}
-              style={{ width: '100%' }}
-            />
-            <LogButtons
-              onClear={() => {
-                outputLogRef.current.value = '';
-              }}
-              onCopy={() => {
-                outputLogRef.current.select();
-                document.execCommand('copy');
-              }}
-            />
-          </div>
         </>
       )}
+
+      <div className={classnames('field', { 'is-hidden': !showLog })}>
+        <div className="label">Log output</div>
+        <textarea
+          className="textarea has-background-dark has-text-success is-size-7"
+          name="output"
+          ref={outputLogRef}
+          id="output"
+          rows={20}
+          style={{ width: '100%' }}
+        />
+        <LogButtons
+          onClear={() => {
+            outputLogRef.current.value = '';
+          }}
+          onCopy={() => {
+            outputLogRef.current.select();
+            document.execCommand('copy');
+          }}
+          onHide={() => setShowLog(false)}
+        />
+      </div>
     </>
   );
 };

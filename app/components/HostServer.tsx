@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/label-has-associated-control */
+import { ChildProcessWithoutNullStreams } from 'child_process';
+import classnames from 'classnames';
 import { shell } from 'electron';
 import publicIp from 'public-ip';
 import React from 'react';
@@ -9,7 +11,8 @@ import {
   bufferSizes,
   connectionPort,
   hubConnectionPort,
-  sampleRates,
+  // eslint-disable-next-line prettier/prettier
+  sampleRates
 } from '../constants/constants';
 import { generateConnectionCode } from '../features/connectionCode';
 import {
@@ -18,12 +21,12 @@ import {
   isJackServerRunning,
   killProcesses,
   startJackdmp,
-  startJackTripServer,
+  // eslint-disable-next-line prettier/prettier
+  startJackTripServer
 } from '../features/jackInterface';
 import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
 import ConnectionIndicator from './ConnectionIndicator';
-import InputMonitoringButton from './InputMonitoring';
 import LogButtons from './LogButtons';
 
 const HostServer = () => {
@@ -33,6 +36,7 @@ const HostServer = () => {
   const [queueLength, setQueueLength] = React.useState<string>('4');
   const [bits, setBits] = React.useState<string>('16');
   const [hub, setHub] = React.useState<boolean>(false);
+  const [showLog, setShowLog] = React.useState<boolean>(false);
 
   const [serverStart, setServerStart] = React.useState<boolean>(false);
   const [connected, setConnected] = React.useState<boolean>(false);
@@ -43,6 +47,9 @@ const HostServer = () => {
 
   const connectionCodeRef = React.useRef(null);
   const outputLogRef = React.useRef(null);
+  const sendLog = (output: string | ChildProcessWithoutNullStreams) => {
+    sendProcessOutput(outputLogRef, output);
+  };
 
   const stopPolling = () => {
     if (pollConnection) {
@@ -89,10 +96,13 @@ const HostServer = () => {
 
   const handleConnect = () => {
     killProcesses();
+    outputLogRef.current.value = '';
+    setShowLog(true);
     setServerStart(true);
 
     const jackdmp = startJackdmp(bufferSize, sampleRate);
-    sendProcessOutput(outputLogRef, jackdmp);
+    sendLog(jackdmp.command);
+    sendLog(jackdmp.process);
 
     const j = setInterval(() => {
       if (isJackServerRunning()) {
@@ -104,7 +114,8 @@ const HostServer = () => {
           }
         });
         const jacktrip = startJackTripServer(hub, queueLength, bits);
-        sendProcessOutput(outputLogRef, jacktrip);
+        sendLog(jacktrip.command);
+        sendLog(jacktrip.process);
         clearInterval(j);
         setPollJack(undefined);
       }
@@ -117,9 +128,10 @@ const HostServer = () => {
         outputLogRef.current &&
         outputLogRef.current.value.includes('Received Connection from Peer!')
       ) {
-        connectChannel('system:capture_1', 'JackTrip:send_1');
-        connectChannel('JackTrip:receive_1', 'system:playback_1');
-        connectChannel('JackTrip:receive_1', 'system:playback_2');
+        sendLog(connectChannel('system:capture_1', 'JackTrip:send_1'));
+        sendLog(connectChannel('system:capture_2', 'JackTrip:send_1'));
+        sendLog(connectChannel('JackTrip:receive_1', 'system:playback_1'));
+        sendLog(connectChannel('JackTrip:receive_1', 'system:playback_2'));
         setConnected(true);
         clearInterval(i);
         setPollConnection(undefined);
@@ -355,7 +367,6 @@ const HostServer = () => {
       ) : (
         <>
           <div className="pulled-right">
-            <InputMonitoringButton />
             <button
               type="button"
               style={{ marginLeft: 10 }}
@@ -370,28 +381,32 @@ const HostServer = () => {
             standbyMessage="Waiting for a connection..."
             successMessage="connected!"
           />
-          <div className="field">
-            <div className="label">Log output</div>
-            <textarea
-              className="textarea has-background-dark has-text-success is-size-7"
-              name="output"
-              ref={outputLogRef}
-              id="output"
-              rows={12}
-              style={{ width: '100%' }}
-            />
-            <LogButtons
-              onClear={() => {
-                outputLogRef.current.value = '';
-              }}
-              onCopy={() => {
-                outputLogRef.current.select();
-                document.execCommand('copy');
-              }}
-            />
-          </div>
         </>
       )}
+
+      <div className={classnames('field', { 'is-hidden': !showLog })}>
+        <div className="label">Log output</div>
+        <textarea
+          className="textarea has-background-dark has-text-success is-size-7"
+          name="output"
+          ref={outputLogRef}
+          id="output"
+          rows={12}
+          style={{ width: '100%' }}
+        />
+        <LogButtons
+          onClear={() => {
+            outputLogRef.current.value = '';
+          }}
+          onCopy={() => {
+            outputLogRef.current.select();
+            document.execCommand('copy');
+          }}
+          onHide={() => {
+            setShowLog(false);
+          }}
+        />
+      </div>
     </>
   );
 };
