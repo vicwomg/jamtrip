@@ -26,5 +26,14 @@
     "test/**/__snapshots__": true,
     "yarn.lock": true,
     "*.{css,sass,scss}.d.ts": true
+  },
+
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.organizeImports": true
   }
 }

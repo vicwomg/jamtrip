@@ -28,7 +28,7 @@ import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
 import ConnectionIndicator from './ConnectionIndicator';
 import InputMonitoringButton from './InputMonitoring';
-import LogButtons from './LogButtons';
+import LogModal from './LogModal';
 
 const HostServer = () => {
   // Server settings
@@ -119,7 +119,6 @@ const HostServer = () => {
   const handleConnect = () => {
     killProcesses();
     clearLog();
-    setShowLog(true);
     setServerStart(true);
 
     const jackdmp = startJackdmp(bufferSize, sampleRate);
@@ -460,8 +459,16 @@ const HostServer = () => {
         </>
       )}
 
-      {!serverStart ? (
-        <div className="pulled-right">
+      <div className="pulled-right">
+        <button
+          type="button"
+          style={{ marginRight: 10 }}
+          onClick={() => setShowLog(true)}
+          className="button is-rounded"
+        >
+          Show log
+        </button>
+        {!serverStart ? (
           <button
             type="button"
             disabled={!isValid}
@@ -470,10 +477,8 @@ const HostServer = () => {
           >
             Start server
           </button>
-        </div>
-      ) : (
-        <>
-          <div className="pulled-right">
+        ) : (
+          <>
             <InputMonitoringButton />
             <button
               type="button"
@@ -483,40 +488,20 @@ const HostServer = () => {
             >
               Stop server
             </button>
-          </div>
-          <ConnectionIndicator
-            connected={connected}
-            standbyMessage="Waiting for a connection..."
-            successMessage="connected!"
-          />
-        </>
-      )}
-
-      <div className={classnames('field', { 'is-hidden': !showLog })}>
-        <div className="label">Log output</div>
-        <textarea
-          className="textarea has-background-dark has-text-success is-size-7"
-          name="output"
-          ref={outputLogRef}
-          id="output"
-          rows={12}
-          style={{ width: '100%' }}
-        />
-        <LogButtons
-          onClear={() => {
-            clearLog();
-          }}
-          onCopy={() => {
-            if (outputLogRef.current) {
-              outputLogRef.current.select();
-              document.execCommand('copy');
-            }
-          }}
-          onHide={() => {
-            setShowLog(false);
-          }}
-        />
+            <ConnectionIndicator
+              connected={connected}
+              standbyMessage="Waiting for a connection..."
+              successMessage="connected!"
+            />
+          </>
+        )}
       </div>
+
+      <LogModal
+        outputLogRef={outputLogRef}
+        isActive={showLog}
+        onClose={() => setShowLog(false)}
+      />
     </>
   );
 };

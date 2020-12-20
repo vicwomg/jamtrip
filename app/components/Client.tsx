@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { ChildProcessWithoutNullStreams } from 'child_process';
-import classnames from 'classnames';
 import React from 'react';
 import {
   bitResolution,
@@ -22,7 +21,7 @@ import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
 import ConnectionIndicator from './ConnectionIndicator';
 import InputMonitoringButton from './InputMonitoring';
-import LogButtons from './LogButtons';
+import LogModal from './LogModal';
 
 const ClientConnect = () => {
   const [host, setHost] = React.useState<string>('');
@@ -108,7 +107,6 @@ const ClientConnect = () => {
 
   const handleConnect = () => {
     killProcesses();
-    setShowLog(true);
     clearLog();
     setConnect(true);
 
@@ -316,10 +314,10 @@ const ClientConnect = () => {
                     }}
                   />
                   <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
-                    <b>Queue buffer length</b> in packet size. If your
-                    connection is very unstable, with a lot of jitter, increase
-                    this number at the expense of a higher latency. Can be
-                    independent of server value. Default: 4
+                    <b>Queue buffer length</b>. If your connection is very
+                    unstable / has lots of jitter, increase this at the expense
+                    of a higher latency. Can be different from server. Default:
+                    4
                   </p>
                 </div>
                 <div className="is-flex" style={{ alignItems: 'center' }}>
@@ -337,9 +335,8 @@ const ClientConnect = () => {
                   />
                   <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
                     <b>Packet redundancy</b> Number of redundant data packets to
-                    send, increasing it will reduce audio glitches, but multiply
-                    the amount of required bandwidth. Must match server value.
-                    Default: 1
+                    send. Increasing can lower audio glitches. Must match server
+                    value. Default: 1
                   </p>
                 </div>
               </div>
@@ -348,8 +345,33 @@ const ClientConnect = () => {
         </>
       )}
 
-      {!connect ? (
-        <div className="pulled-right">
+      {connect && (
+        <>
+          <div className="label">Connection details</div>
+          <div className="is-size-7" style={{ marginBottom: 10 }}>
+            <b>Host</b>: {host}&nbsp;&nbsp;&nbsp;<b>Hub</b>: {hub.toString()}{' '}
+            <br />
+            <b>Sample rate</b>: {sampleRate} hz&nbsp;&nbsp;&nbsp;
+            <b>Buffer size</b>: {bufferSize} fpp&nbsp;&nbsp;&nbsp;
+            <b>Bit rate</b>: {bitRate}&nbsp;&nbsp;&nbsp;
+            <br />
+            <b>Queue length</b>: {queueLength}&nbsp;&nbsp;&nbsp;
+            <b>Redundancy</b>: {redundancy}&nbsp;&nbsp;&nbsp;
+          </div>
+          <hr />
+        </>
+      )}
+
+      <div className="pulled-right">
+        <button
+          type="button"
+          onClick={() => setShowLog(true)}
+          className="button is-rounded"
+          style={{ marginRight: 10 }}
+        >
+          Show log
+        </button>
+        {!connect ? (
           <button
             type="button"
             disabled={!isValid}
@@ -358,65 +380,33 @@ const ClientConnect = () => {
           >
             Connect
           </button>
-        </div>
-      ) : (
-        <>
+        ) : (
           <>
-            <div className="label">Connection details</div>
-            <div className="is-size-7" style={{ marginBottom: 10 }}>
-              <b>Host</b>: {host}&nbsp;&nbsp;&nbsp;<b>Hub</b>: {hub.toString()}{' '}
-              <br />
-              <b>Sample rate</b>: {sampleRate} hz&nbsp;&nbsp;&nbsp;
-              <b>Buffer size</b>: {bufferSize} fpp&nbsp;&nbsp;&nbsp;
-              <b>Bit rate</b>: {bitRate}&nbsp;&nbsp;&nbsp;
-              <br />
-              <b>Queue length</b>: {queueLength}&nbsp;&nbsp;&nbsp;
-              <b>Redundancy</b>: {redundancy}&nbsp;&nbsp;&nbsp;
+            <div className="pulled-right">
+              <InputMonitoringButton />
+              <button
+                style={{ marginLeft: 10 }}
+                type="button"
+                onClick={handleDisconnect}
+                className="button is-rounded is-danger"
+              >
+                Disconnect
+              </button>
             </div>
+            <ConnectionIndicator
+              connected={connected}
+              standbyMessage="connecting to server..."
+              successMessage="connected!"
+            />
           </>
-          <hr />
-          <div className="pulled-right">
-            <InputMonitoringButton />
-            <button
-              style={{ marginLeft: 10 }}
-              type="button"
-              onClick={handleDisconnect}
-              className="button is-rounded is-danger"
-            >
-              Disconnect
-            </button>
-          </div>
-          <ConnectionIndicator
-            connected={connected}
-            standbyMessage="connecting to server..."
-            successMessage="connected!"
-          />
-        </>
-      )}
-
-      <div className={classnames('field', { 'is-hidden': !showLog })}>
-        <div className="label">Log output</div>
-        <textarea
-          className="textarea has-background-dark has-text-success is-size-7"
-          name="output"
-          ref={outputLogRef}
-          id="output"
-          rows={20}
-          style={{ width: '100%' }}
-        />
-        <LogButtons
-          onClear={() => {
-            clearLog();
-          }}
-          onCopy={() => {
-            if (outputLogRef.current) {
-              outputLogRef.current.select();
-              document.execCommand('copy');
-            }
-          }}
-          onHide={() => setShowLog(false)}
-        />
+        )}
       </div>
+
+      <LogModal
+        outputLogRef={outputLogRef}
+        isActive={showLog}
+        onClose={() => setShowLog(false)}
+      />
     </>
   );
 };
