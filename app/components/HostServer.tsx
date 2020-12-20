@@ -27,16 +27,23 @@ import {
 import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
 import ConnectionIndicator from './ConnectionIndicator';
+import InputMonitoringButton from './InputMonitoring';
 import LogButtons from './LogButtons';
 
 const HostServer = () => {
+  // Server settings
   const [host, setHost] = React.useState<string>('');
   const [sampleRate, setSampleRate] = React.useState<string>('48000');
   const [bufferSize, setBufferSize] = React.useState<string>('256');
   const [queueLength, setQueueLength] = React.useState<string>('4');
-  const [bits, setBits] = React.useState<string>('16');
+  const [redundancy, setRedundancy] = React.useState<string>('1');
+  const [bitRate, setBitRate] = React.useState<string>('16');
   const [hub, setHub] = React.useState<boolean>(false);
+  const [hubPatchMode, setHubPatchMode] = React.useState<string>('2');
+
+  // UI
   const [showLog, setShowLog] = React.useState<boolean>(false);
+  const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false);
 
   const [serverStart, setServerStart] = React.useState<boolean>(false);
   const [connected, setConnected] = React.useState<boolean>(false);
@@ -45,10 +52,19 @@ const HostServer = () => {
   const [pollJack, setPollJack] = React.useState<NodeJS.Timeout>();
   const [pollConnection, setPollConnection] = React.useState<NodeJS.Timeout>();
 
-  const connectionCodeRef = React.useRef(null);
-  const outputLogRef = React.useRef(null);
+  const connectionCodeRef = React.useRef<HTMLInputElement>(null);
+  const outputLogRef = React.useRef<HTMLTextAreaElement>(null);
+
   const sendLog = (output: string | ChildProcessWithoutNullStreams) => {
-    sendProcessOutput(outputLogRef, output);
+    if (outputLogRef) {
+      sendProcessOutput(outputLogRef, output);
+    }
+  };
+
+  const clearLog = () => {
+    if (outputLogRef.current) {
+      outputLogRef.current.value = '';
+    }
   };
 
   const stopPolling = () => {
@@ -71,10 +87,16 @@ const HostServer = () => {
       setBufferSize(value);
     });
     getPersistence('server_bit_resolution', (value) => {
-      setBits(value);
+      setBitRate(value);
     });
     getPersistence('server_queue_length', (value) => {
       setQueueLength(value);
+    });
+    getPersistence('server_packet_redundancy', (value) => {
+      setRedundancy(value);
+    });
+    getPersistence('server_hub_patch_mode', (value) => {
+      setHubPatchMode(value);
     });
     getPersistence('server_hub', (value) => {
       setHub(value === 'true');
@@ -96,7 +118,7 @@ const HostServer = () => {
 
   const handleConnect = () => {
     killProcesses();
-    outputLogRef.current.value = '';
+    clearLog();
     setShowLog(true);
     setServerStart(true);
 
@@ -113,7 +135,13 @@ const HostServer = () => {
             configureInputMonitoring(true);
           }
         });
-        const jacktrip = startJackTripServer(hub, queueLength, bits);
+        const jacktrip = startJackTripServer(
+          hub,
+          queueLength,
+          bitRate,
+          hubPatchMode,
+          redundancy
+        );
         sendLog(jacktrip.command);
         sendLog(jacktrip.process);
         clearInterval(j);
@@ -244,53 +272,126 @@ const HostServer = () => {
           </div>
 
           <div className="field ">
-            <div className="label">Advanced</div>
-            <div className="is-flex" style={{ alignItems: 'center' }}>
-              <input
-                className="input is-small"
-                type="number"
-                value={queueLength}
-                style={{ width: 60 }}
-                onChange={(b) => {
-                  const r = b.currentTarget.value;
-                  setPersistence('server_queue_length', r, () =>
-                    setQueueLength(r)
-                  );
-                }}
-              />
-              <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
-                <b>Queue buffer length</b> in packet size. If your connection is
-                very unstable, with a lot of jitter, increase this number at the
-                expense of a higher latency. Default: 4
-              </p>
+            <div className="label">
+              Advanced settings&nbsp;&nbsp;
+              <a
+                className="has-text-link is-size-7"
+                href="# "
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                {showAdvanced ? (
+                  <>
+                    <i className="fas fa-angle-up" /> hide
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-angle-down" /> show
+                  </>
+                )}
+              </a>
             </div>
-            <div
-              className="is-flex"
-              style={{ alignItems: 'center', marginTop: 5 }}
-            >
-              <div className="select is-small" style={{}}>
-                <select
-                  value={bits}
+
+            <div className={classnames({ 'is-hidden': !showAdvanced })}>
+              <div className="is-flex" style={{ alignItems: 'center' }}>
+                <input
+                  className="input is-small"
+                  type="number"
+                  value={queueLength}
+                  style={{ width: 60 }}
                   onChange={(b) => {
                     const r = b.currentTarget.value;
-                    setPersistence('server_bit_resolution', r, () =>
-                      setBits(r)
+                    setPersistence('server_queue_length', r, () =>
+                      setQueueLength(r)
                     );
                   }}
-                >
-                  <option disabled>Bits</option>
-                  {bitResolution.map((e) => (
-                    <option key={e} value={e}>
-                      {e}
-                    </option>
-                  ))}
-                </select>
+                />
+                <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+                  <b>Queue buffer length</b> in packet size. If your connection
+                  is very unstable, with a lot of jitter, increase this number
+                  at the expense of a higher latency. Default: 4
+                </p>
               </div>
-              <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
-                <b>Audio bit rate resolution</b> can be used to decrease (or
-                increase) the bandwidth requirements, at the expense of a lower
-                audio quality. Default: 16
-              </p>
+              <div
+                className="is-flex"
+                style={{ alignItems: 'center', marginTop: 5 }}
+              >
+                <div className="select is-small" style={{}}>
+                  <select
+                    value={bitRate}
+                    onChange={(b) => {
+                      const r = b.currentTarget.value;
+                      setPersistence('server_bit_resolution', r, () =>
+                        setBitRate(r)
+                      );
+                    }}
+                  >
+                    <option disabled>Bits</option>
+                    {bitResolution.map((e) => (
+                      <option key={e} value={e}>
+                        {e}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+                  <b>Audio bit rate resolution</b> can be used to decrease (or
+                  increase) the bandwidth requirements, at the expense of a
+                  lower audio quality. Default: 16
+                </p>
+              </div>
+              <div className="is-flex" style={{ alignItems: 'center' }}>
+                <input
+                  className="input is-small"
+                  type="number"
+                  value={redundancy}
+                  style={{ width: 60 }}
+                  onChange={(b) => {
+                    const r = b.currentTarget.value;
+                    setPersistence('server_packet_redundancy', r, () =>
+                      setRedundancy(r)
+                    );
+                  }}
+                />
+                <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+                  <b>Packet redundancy</b> amount of redundant data packets to
+                  send, increasing it will reduce audio glitches, but multiply
+                  the amount of required bandwidth. Default: 1
+                </p>
+              </div>
+              <div
+                className="is-flex"
+                style={{ alignItems: 'center', marginTop: 5 }}
+              >
+                <div className="select is-small" style={{}}>
+                  <select
+                    value={hubPatchMode}
+                    onChange={(b) => {
+                      const r = b.currentTarget.value;
+                      setPersistence('server_hub_patch_mode', r, () =>
+                        setHubPatchMode(r)
+                      );
+                    }}
+                  >
+                    <option disabled>Hub patch</option>
+                    <option key="0" value="0">
+                      0: Client only hears server
+                    </option>
+                    <option key="1" value="1">
+                      1: Client only hears self
+                    </option>
+                    <option key="2" value="2">
+                      2: Client hears all except self
+                    </option>
+                    <option key="4" value="4">
+                      4: Full mix
+                    </option>
+                  </select>
+                </div>
+                <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+                  <b>Hub patch mode</b> audio routing modes (for hub sessions
+                  only). You will probably want to stick to the default: 2
+                </p>
+              </div>
             </div>
           </div>
         </>
@@ -304,7 +405,8 @@ const HostServer = () => {
             <b>Sample rate</b>: {sampleRate} hz&nbsp;&nbsp;&nbsp;
             <b>Buffer size</b>: {bufferSize} fpp <br /> <b>Queue length</b>:{' '}
             {queueLength}&nbsp;&nbsp;&nbsp;
-            <b>Bits</b>: {bits}
+            <b>Bits</b>: {bitRate}&nbsp;&nbsp;&nbsp;<b>Redundancy</b>:{' '}
+            {redundancy}
           </div>
         </>
       )}
@@ -317,13 +419,16 @@ const HostServer = () => {
                 <input
                   className="input"
                   readOnly
-                  style={{ width: 300 }}
+                  style={{ width: 320 }}
                   ref={connectionCodeRef}
                   value={generateConnectionCode(
                     host,
                     sampleRate,
                     bufferSize,
-                    hub
+                    hub,
+                    queueLength,
+                    bitRate,
+                    redundancy
                   )}
                 />
               </div>
@@ -332,12 +437,14 @@ const HostServer = () => {
                   type="button"
                   className="button"
                   onClick={() => {
-                    connectionCodeRef.current.select();
-                    document.execCommand('copy');
-                    setCodeCopied(true);
-                    setTimeout(() => {
-                      setCodeCopied(false);
-                    }, 2000);
+                    if (connectionCodeRef.current) {
+                      connectionCodeRef.current.select();
+                      document.execCommand('copy');
+                      setCodeCopied(true);
+                      setTimeout(() => {
+                        setCodeCopied(false);
+                      }, 2000);
+                    }
                   }}
                 >
                   <i className="fas fa-copy" />
@@ -367,6 +474,7 @@ const HostServer = () => {
       ) : (
         <>
           <div className="pulled-right">
+            <InputMonitoringButton />
             <button
               type="button"
               style={{ marginLeft: 10 }}
@@ -396,11 +504,13 @@ const HostServer = () => {
         />
         <LogButtons
           onClear={() => {
-            outputLogRef.current.value = '';
+            clearLog();
           }}
           onCopy={() => {
-            outputLogRef.current.select();
-            document.execCommand('copy');
+            if (outputLogRef.current) {
+              outputLogRef.current.select();
+              document.execCommand('copy');
+            }
           }}
           onHide={() => {
             setShowLog(false);

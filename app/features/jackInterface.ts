@@ -86,8 +86,27 @@ export const isJackServerRunning = () => {
   return proc.status === 0;
 };
 
-export const startJackTripClient = (host: string, hub: boolean) => {
-  const params = [hub ? '-C' : '-c', host];
+export const startJackTripClient = (
+  host: string,
+  hub: boolean,
+  queueBuffer: string,
+  bits: string,
+  redundancy: string
+) => {
+  const params = [
+    '-n',
+    '1',
+    '-z',
+    '-q',
+    queueBuffer,
+    '-b',
+    bits,
+    '-r',
+    redundancy || '1',
+    hub ? '-C' : '-c',
+    host,
+  ];
+  // const params = ['-n', '1', '-z', hub ? '-C' : '-c', host];
   return {
     command: `** ${paths.jackTrip} ${paramsToString(params)}`,
     process: spawn(paths.jackTrip, params),
@@ -97,9 +116,24 @@ export const startJackTripClient = (host: string, hub: boolean) => {
 export const startJackTripServer = (
   hub: boolean,
   queueBuffer: string,
-  bits: string
+  bits: string,
+  hubPatchMode?: string,
+  redundancy?: string
 ) => {
-  const params = [hub ? '-S' : '-s', '-q', queueBuffer, '-b', bits];
+  const params = [
+    hub ? '-S' : '-s',
+    '-p',
+    hubPatchMode || '2',
+    '-n',
+    '1',
+    '-q',
+    queueBuffer,
+    '-b',
+    bits,
+    '-z',
+    '-r',
+    redundancy || '1',
+  ];
   return {
     command: `** ${paths.jackTrip} ${paramsToString(params)}`,
     process: spawn(paths.jackTrip, params),

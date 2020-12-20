@@ -1,7 +1,7 @@
 import { ChildProcessWithoutNullStreams } from 'child_process';
 
 const sendProcessOutput = (
-  textareaRef: React.MutableRefObject<null>,
+  textareaRef: React.RefObject<HTMLTextAreaElement>,
   output: ChildProcessWithoutNullStreams | string
 ) => {
   if (typeof output === 'string') {

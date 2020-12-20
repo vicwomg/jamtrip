@@ -2,7 +2,12 @@
 import { ChildProcessWithoutNullStreams } from 'child_process';
 import classnames from 'classnames';
 import React from 'react';
-import { bufferSizes, sampleRates } from '../constants/constants';
+import {
+  bitResolution,
+  bufferSizes,
+  // eslint-disable-next-line prettier/prettier
+  sampleRates
+} from '../constants/constants';
 import { decodeConnectionCode } from '../features/connectionCode';
 import {
   configureInputMonitoring,
@@ -23,6 +28,9 @@ const ClientConnect = () => {
   const [host, setHost] = React.useState<string>('');
   const [sampleRate, setSampleRate] = React.useState<string>('');
   const [bufferSize, setBufferSize] = React.useState<string>('');
+  const [bitRate, setBitRate] = React.useState<string>('');
+  const [queueLength, setQueueLength] = React.useState<string>('');
+  const [redundancy, setRedundancy] = React.useState<string>('');
   const [hub, setHub] = React.useState<boolean>(false);
   const [connectionCode, setConnectionCode] = React.useState<string>('');
   const [manualConnect, setManualConnect] = React.useState<boolean>(false);
@@ -74,6 +82,9 @@ const ClientConnect = () => {
       setSampleRate(decoded.sampleRate);
       setBufferSize(decoded.bufferSize);
       setHub(decoded.hub);
+      setRedundancy(decoded.redundancy);
+      setQueueLength(decoded.queue);
+      setBitRate(decoded.bitRate);
       setPersistence('connection_code', connectionCode.trim());
     } else {
       clearSettings();
@@ -85,15 +96,20 @@ const ClientConnect = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionCode]);
 
-  const outputLogRef = React.useRef(null);
+  const outputLogRef = React.useRef<HTMLTextAreaElement>(null);
   const sendLog = (output: string | ChildProcessWithoutNullStreams) => {
     sendProcessOutput(outputLogRef, output);
+  };
+  const clearLog = () => {
+    if (outputLogRef.current) {
+      outputLogRef.current.value = '';
+    }
   };
 
   const handleConnect = () => {
     killProcesses();
     setShowLog(true);
-    outputLogRef.current.value = '';
+    clearLog();
     setConnect(true);
 
     const jackdmp = startJackdmp(bufferSize, sampleRate);
@@ -110,7 +126,13 @@ const ClientConnect = () => {
             configureInputMonitoring(true);
           }
         });
-        const jacktrip = startJackTripClient(host, hub);
+        const jacktrip = startJackTripClient(
+          host,
+          hub,
+          queueLength,
+          bitRate,
+          redundancy
+        );
         sendLog(jacktrip.command);
         sendLog(jacktrip.process);
         clearInterval(j);
@@ -177,7 +199,7 @@ const ClientConnect = () => {
               />
             </div>
             <p className="help">
-              <u>Example</u>: jackloop256.stanford.edu_48000_256_h
+              <u>Example</u>: jackloop256.stanford.edu_48000_256_h_b16_q4_r1
             </p>
           </div>
           <div className="field">
@@ -257,15 +279,72 @@ const ClientConnect = () => {
                       ))}
                     </select>
                   </div>
+                  <div className="select" style={{ marginLeft: 10 }}>
+                    <select
+                      value={bitRate}
+                      onChange={(b) => setBitRate(b.currentTarget.value)}
+                    >
+                      <option value="" disabled>
+                        Bit rate
+                      </option>
+                      {bitResolution.map((e) => (
+                        <option key={e} value={e}>
+                          {e}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div className="help">
                   These must match the settings on the server.
                 </div>
               </div>
+              <div className="field ">
+                <div className="label">Advanced</div>
+                <div className="is-flex" style={{ alignItems: 'center' }}>
+                  <input
+                    className="input is-small"
+                    type="number"
+                    value={queueLength}
+                    style={{ width: 60 }}
+                    onChange={(b) => {
+                      const r = b.currentTarget.value;
+                      setPersistence('server_queue_length', r, () =>
+                        setQueueLength(r)
+                      );
+                    }}
+                  />
+                  <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+                    <b>Queue buffer length</b> in packet size. If your
+                    connection is very unstable, with a lot of jitter, increase
+                    this number at the expense of a higher latency. Can be
+                    independent of server value. Default: 4
+                  </p>
+                </div>
+                <div className="is-flex" style={{ alignItems: 'center' }}>
+                  <input
+                    className="input is-small"
+                    type="number"
+                    value={redundancy}
+                    style={{ width: 60 }}
+                    onChange={(b) => {
+                      const r = b.currentTarget.value;
+                      setPersistence('server_packet_redundancy', r, () =>
+                        setRedundancy(r)
+                      );
+                    }}
+                  />
+                  <p className="help" style={{ marginLeft: 10, marginTop: 0 }}>
+                    <b>Packet redundancy</b> Number of redundant data packets to
+                    send, increasing it will reduce audio glitches, but multiply
+                    the amount of required bandwidth. Must match server value.
+                    Default: 1
+                  </p>
+                </div>
+              </div>
             </>
           )}
-          <hr />
         </>
       )}
 
@@ -283,12 +362,16 @@ const ClientConnect = () => {
       ) : (
         <>
           <>
-            <div className="label">Server details</div>
+            <div className="label">Connection details</div>
             <div className="is-size-7" style={{ marginBottom: 10 }}>
               <b>Host</b>: {host}&nbsp;&nbsp;&nbsp;<b>Hub</b>: {hub.toString()}{' '}
               <br />
               <b>Sample rate</b>: {sampleRate} hz&nbsp;&nbsp;&nbsp;
-              <b>Buffer size</b>: {bufferSize} fpp
+              <b>Buffer size</b>: {bufferSize} fpp&nbsp;&nbsp;&nbsp;
+              <b>Bit rate</b>: {bitRate}&nbsp;&nbsp;&nbsp;
+              <br />
+              <b>Queue length</b>: {queueLength}&nbsp;&nbsp;&nbsp;
+              <b>Redundancy</b>: {redundancy}&nbsp;&nbsp;&nbsp;
             </div>
           </>
           <hr />
@@ -323,11 +406,13 @@ const ClientConnect = () => {
         />
         <LogButtons
           onClear={() => {
-            outputLogRef.current.value = '';
+            clearLog();
           }}
           onCopy={() => {
-            outputLogRef.current.select();
-            document.execCommand('copy');
+            if (outputLogRef.current) {
+              outputLogRef.current.select();
+              document.execCommand('copy');
+            }
           }}
           onHide={() => setShowLog(false)}
         />
