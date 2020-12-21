@@ -170,6 +170,25 @@ export const configureInputMonitoring = (inputMonitoring: boolean) => {
   return output;
 };
 
+export const getHubClients = () => {
+  const result = spawnSync(paths.jackLsp);
+  const output = result.stdout.toString().split('\n');
+  const sendChannels = Array<string>();
+  const receiveChannels = Array<string>();
+  output.forEach((e) => {
+    if (e.includes('send_')) {
+      sendChannels.push(e);
+    }
+    if (e.includes('receive_')) {
+      receiveChannels.push(e);
+    }
+  });
+  return {
+    sendChannels,
+    receiveChannels,
+  };
+};
+
 export const killProcesses = () => {
   if (process.platform === 'win32') {
     spawnSync('taskkill', ['/IM', 'jacktrip.exe', '/F']);

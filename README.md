@@ -34,7 +34,7 @@ JACK is software for routing your audio channels to various destinations. In thi
 
 - The version that is available on the jackaudio.org web site does not work with recent versions of OS X. Download a beta version that works with El Capitan and later [here](https://ccrma.stanford.edu/software/jacktrip/osx/JackOSX.0.92_b3.pkg)
 - Double click on the .pkg file to install
-  - You may see a security warning pop up window, if so press OK to dismiss it
+  - You may see a security warning pop up window, if so press OK to dismiss it (WARNING: if you don't DISMISS the popup, the below "open anyway" button wont show)
   - Open Spotlight Search (CMD + space, or click the upper right magnifying glass icon), type "Security & Privacy" and launch. (Or System Preferences > Security & Privacy)
   - Click the "General" button and click "Open Anyway" towards the bottom, where it lists the blocked package.
   - Then click "Open" in the next security confirmation window to complete the installation.
@@ -52,7 +52,7 @@ JACK is software for routing your audio channels to various destinations. In thi
   - **Mac**: by dragging the app into Applications.
   - **Windows**: running the installer
 - Double click it to launch the app
-  - **Mac**: you will have to do that whole "security warning" song and dance again to launch.
+  - **Mac**: you will have to do that whole "security warning" song and dance again to launch: press "ok" to dismiss the warning, then click "open anyway" in System Preferences > Security & Privacy
   - **Older macs**: Saw this on El Capitan: you need to additionally "Allow apps downloaded from: Everywhere" under "Security & Privacy", otherwise it wont get past an app verification loop
   - **Windows**: Installation puts a shortcut on the desktop.
 
@@ -73,7 +73,7 @@ To connect to a JackTrip server, enter the "Connection code" you get from the pe
 - **Mac**: You may get a quick popup about enabling your microphone. Confirm that alert.
 - **Windows**: You will get a firewall warning, confirm it to allow the connections that it's requesting.
 
-As a test, you can use the sample code listed under the "Example" field to do a quick connecttion to Stanford's test servers: `jackloop256.stanford.edu_48000_256_h`. After connecting, you should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should technically be able to connect to any hosted JackTrip server.
+As a test, you can use the sample code listed under the "Example" field to do a quick connecttion to Stanford's test servers: `jackloop256.stanford.edu_48000_256_h_b16_q4_r1`. After connecting, you should hear your microphone being monitored through your headphones and a periodic clapping sound. If so, you should technically be able to connect to any hosted JackTrip server.
 
 Hit disconnect to disconnect from the server.
 
@@ -83,7 +83,7 @@ To host a JackTrip server, click the "Host a server" tab in the app, configure y
 
 Once you're both connected, you should see the "connected!" indicator and you should both be able to hear each other!
 
-Note: For server hosting to work, you need to have UDP port 4464 open and if using hub mode, additionally ports 61000, 61001 ... 61XXX (depending on how many connections you want to support). Regular servers are one-on-one connections. Hub mode allows 3 or more people. For info on how to forward ports, [this article](https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/) is pretty good.
+Note: For server hosting to work, you need to have UDP port 4464 open and if using hub mode, additionally ports 61000-61020 (depending on how many concurrent connections you want to support. Regular servers are one-on-one connections. Hub mode allows 3 or more people. For info on how to forward ports, [this article](https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/) is pretty good.
 
 ## Building JamTrip
 

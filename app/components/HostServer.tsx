@@ -17,7 +17,6 @@ import {
 import { generateConnectionCode } from '../features/connectionCode';
 import {
   configureInputMonitoring,
-  connectChannel,
   isJackServerRunning,
   killProcesses,
   startJackdmp,
@@ -26,9 +25,10 @@ import {
 } from '../features/jackInterface';
 import { getPersistence, setPersistence } from '../features/persistence';
 import sendProcessOutput from '../features/sendProcessOutput';
-import ConnectionIndicator from './ConnectionIndicator';
+import HubClientConnections from './HubClientConnections';
 import InputMonitoringButton from './InputMonitoring';
 import LogModal from './LogModal';
+import P2PClientConnections from './P2PClientConnections';
 
 const HostServer = () => {
   // Server settings
@@ -46,7 +46,7 @@ const HostServer = () => {
   const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false);
 
   const [serverStart, setServerStart] = React.useState<boolean>(false);
-  const [connected, setConnected] = React.useState<boolean>(false);
+  // const [connected, setConnected] = React.useState<boolean>(false);
   const [codeCopied, setCodeCopied] = React.useState<boolean>(false);
 
   const [pollJack, setPollJack] = React.useState<NodeJS.Timeout>();
@@ -150,26 +150,25 @@ const HostServer = () => {
     setPollJack(j);
 
     // poll for connection success, and connect channels on success
-    const i = setInterval(() => {
-      if (
-        outputLogRef.current &&
-        outputLogRef.current.value.includes('Received Connection from Peer!')
-      ) {
-        sendLog(connectChannel('system:capture_1', 'JackTrip:send_1'));
-        sendLog(connectChannel('system:capture_2', 'JackTrip:send_1'));
-        sendLog(connectChannel('JackTrip:receive_1', 'system:playback_1'));
-        sendLog(connectChannel('JackTrip:receive_1', 'system:playback_2'));
-        setConnected(true);
-        clearInterval(i);
-        setPollConnection(undefined);
-      }
-    }, 1000);
-    setPollConnection(i);
+    // const i = setInterval(() => {
+    //   if (
+    //     outputLogRef.current &&
+    //     outputLogRef.current.value.includes('Received Connection from Peer!')
+    //   ) {
+    //     sendLog(connectChannel('system:capture_1', 'JackTrip:send_1'));
+    //     sendLog(connectChannel('system:capture_2', 'JackTrip:send_1'));
+    //     sendLog(connectChannel('JackTrip:receive_1', 'system:playback_1'));
+    //     sendLog(connectChannel('JackTrip:receive_1', 'system:playback_2'));
+    //     setConnected(true);
+    //     clearInterval(i);
+    //     setPollConnection(undefined);
+    //   }
+    // }, 1000);
+    // setPollConnection(i);
   };
 
   const handleDisconnect = () => {
     killProcesses();
-    setConnected(false);
     setServerStart(false);
     stopPolling();
   };
@@ -488,14 +487,16 @@ const HostServer = () => {
             >
               Stop server
             </button>
-            <ConnectionIndicator
-              connected={connected}
-              standbyMessage="Waiting for a connection..."
-              successMessage="connected!"
-            />
           </>
         )}
       </div>
+
+      {serverStart &&
+        (hub ? (
+          <HubClientConnections />
+        ) : (
+          <P2PClientConnections outputLogRef={outputLogRef} />
+        ))}
 
       <LogModal
         outputLogRef={outputLogRef}
