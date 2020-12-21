@@ -109,7 +109,7 @@ In order to simplify setup, JamTrip makes the following assumptions:
 - You're on a reasonably new computer with microphone or audio interface
 - You're using the default CoreAudio sound system on your Mac, or ASIO 4 All on Windows
 - Your desired sound input/output is selected from the OS's "Settings > Sound > Input/Output"
-- You're sending only one channel of audio, probably a microphone
+- You're sending only 2 channel of audio at the most, probably a microphone only, or perhaps an additional instrument in channel 2.
 - Audio mix is mono
 
 More exotic setups such as wanting to send multiple input channels and stereo mixes and other kinds of routing would probably be better suited for using JACK and JackTrip directly for now, but if there is enough interest can be added as new configuration options later.
