@@ -47,7 +47,7 @@ JACK is software for routing your audio channels to various destinations. In thi
 
 ### Install JamTrip
 
-- Download / install the latest JamTrip from: https://github.com/vicwomg/jamtrip/releases (click the "assets" dropdown to the get the .dmg or .exe file)
+- Download / install the latest JamTrip from: https://github.com/vicwomg/jamtrip/releases/latest (click the "assets" dropdown to the get the .dmg or .exe file)
 - Open the installer or disk image and install as you normally would:
   - **Mac**: by dragging the app into Applications.
   - **Windows**: running the installer
