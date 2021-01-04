@@ -42,7 +42,7 @@ const getJackPaths = () => {
   return {
     jackConnect: `${basePath}jack_connect`,
     jackDisconnect: `${basePath}jack_disconnect`,
-    jackDmp: `${basePath}jackdmp`,
+    jackDmp: `${basePath}jackd`,
     jackLsp: `${basePath}jack_lsp`,
     jackTrip: `${basePath}jacktrip`,
   };
