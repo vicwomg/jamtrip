@@ -32,7 +32,7 @@ JACK is software for routing your audio channels to various destinations. In thi
 
 #### OSX
 
-- The version that is available on the jackaudio.org web site does not work with recent versions of OS X. Download a beta version that works with El Capitan and later [here](https://ccrma.stanford.edu/software/jacktrip/osx/JackOSX.0.92_b3.pkg)
+- The version of JACK that is available on the jackaudio.org web site does not work with the most recent versions of OS X. Download a beta version of JACK that works with El Capitan and later [from here](https://ccrma.stanford.edu/software/jacktrip/osx/JackOSX.0.92_b3.pkg)
 - Double click on the .pkg file to install
   - You may see a security warning pop up window, if so press OK to dismiss it (WARNING: if you don't DISMISS the popup, the below "open anyway" button wont show)
   - Open Spotlight Search (CMD + space, or click the upper right magnifying glass icon), type "Security & Privacy" and launch. (Or System Preferences > Security & Privacy)
