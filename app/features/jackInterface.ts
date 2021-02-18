@@ -198,4 +198,5 @@ export const killProcesses = () => {
   spawnSync('killall', ['jacktrip']);
   spawnSync('killall', ['jack_connect']);
   spawnSync('killall', ['jackdmp']);
+  spawnSync('killall', ['jackd']);
 };
