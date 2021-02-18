@@ -102,7 +102,7 @@ yarn package
 
 This builds the platform executables into the ./release directory.
 
-Note: in order to build for raspberry pi, replace the second line above with: `yarn package --arm7l`
+Note: in order to build for raspberry pi, replace the second line above with: `yarn package --armv7l`
 
 ## Details
 
