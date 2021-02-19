@@ -192,7 +192,7 @@ const ClientConnect = () => {
                   defaultValue={connectionCode}
                   ref={codeInputElement}
                   disabled={manualConnect}
-                  style={{ width: 320 }}
+                  style={{ width: 340 }}
                   onChange={(e) => {
                     setConnectionCode(e.currentTarget.value);
                   }}
@@ -387,7 +387,7 @@ const ClientConnect = () => {
           className="button is-rounded"
           style={{ marginRight: 10 }}
         >
-          Show log
+          Log
         </button>
         {!connect ? (
           <button

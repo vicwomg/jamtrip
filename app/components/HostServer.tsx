@@ -420,7 +420,7 @@ const HostServer = () => {
                 <input
                   className="input"
                   readOnly
-                  style={{ width: 320 }}
+                  style={{ width: 340 }}
                   ref={connectionCodeRef}
                   value={generateConnectionCode(
                     useLANIP ? LANIP : host,
@@ -480,7 +480,7 @@ const HostServer = () => {
           onClick={() => setShowLog(true)}
           className="button is-rounded"
         >
-          Show log
+          Log
         </button>
         {!serverStart ? (
           <button
