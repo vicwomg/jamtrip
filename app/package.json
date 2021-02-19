@@ -2,7 +2,7 @@
   "name": "jamtrip",
   "productName": "JamTrip",
   "version": "0.1.3",
-  "description": "",
+  "description": "Graphical frontend for jack and jacktrip",
   "main": "./main.prod.js",
   "author": {
     "name": "Vic Wong",
