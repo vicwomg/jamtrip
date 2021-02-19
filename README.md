@@ -89,6 +89,8 @@ Note: For server hosting to work, you need to have UDP port 4464 open and if usi
 
 This is only necessary if you want to contribute to this project:
 
+### OSX, Linux, and Windows
+
 Requires node js: https://nodejs.org/en/
 
 - Install yarn: https://classic.yarnpkg.com/en/docs/install/
@@ -102,11 +104,17 @@ yarn package
 
 This builds the current platform executables into the ./release directory.
 
+### Raspberry Pi
+
 Note: in order to build for raspberry pi, there are extra steps:
+
+Install node using these instructions (don't just apt-get it!)
+https://linuxize.com/post/how-to-install-node-js-on-raspberry-pi/
 
 Install these packages (the ffi version matters!):
 
 ```
+sudo npm install --global yarn
 sudo apt install ruby ruby-dev libffi-dev rpm
 sudo gem install ffi -v 1.9.21
 sudo gem install fpm
