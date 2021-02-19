@@ -44,7 +44,7 @@ const ClientConnect = () => {
   const isValid =
     !!host && !!sampleRate && !!bufferSize && typeof hub === 'boolean';
 
-  const codeInputElement = React.useRef(null);
+  const codeInputElement = React.useRef<HTMLInputElement>(null);
 
   const clearSettings = () => {
     setHost('');
@@ -184,17 +184,35 @@ const ClientConnect = () => {
             <div style={{ marginBottom: 10 }}>
               The person hosting the server sends the connection code to you.{' '}
             </div>
-            <div className="control">
-              <input
-                type="text"
-                className="input"
-                defaultValue={connectionCode}
-                ref={codeInputElement}
-                disabled={manualConnect}
-                onChange={(e) => {
-                  setConnectionCode(e.currentTarget.value);
-                }}
-              />
+            <div className="field has-addons">
+              <div className="control">
+                <input
+                  type="text"
+                  className="input"
+                  defaultValue={connectionCode}
+                  ref={codeInputElement}
+                  disabled={manualConnect}
+                  style={{ width: 320 }}
+                  onChange={(e) => {
+                    setConnectionCode(e.currentTarget.value);
+                  }}
+                />
+              </div>
+              <div className="control">
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => {
+                    if (codeInputElement.current) {
+                      codeInputElement.current.select();
+                      document.execCommand('paste');
+                    }
+                  }}
+                >
+                  <i className="fas fa-paste" />
+                  &nbsp;paste
+                </button>
+              </div>
             </div>
             <p className="help">
               <u>Example</u>: jackloop256.stanford.edu_48000_256_h_b16_q4_r1

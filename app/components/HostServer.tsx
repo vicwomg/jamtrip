@@ -4,6 +4,7 @@
 import { ChildProcessWithoutNullStreams } from 'child_process';
 import classnames from 'classnames';
 import { shell } from 'electron';
+import ip from 'ip';
 import publicIp from 'public-ip';
 import React from 'react';
 import {
@@ -33,6 +34,8 @@ import P2PClientConnections from './P2PClientConnections';
 const HostServer = () => {
   // Server settings
   const [host, setHost] = React.useState<string>('');
+  const LANIP = ip.address(undefined, 'ipv4');
+  const [useLANIP, setUseLANIP] = React.useState<boolean>(false);
   const [sampleRate, setSampleRate] = React.useState<string>('48000');
   const [bufferSize, setBufferSize] = React.useState<string>('256');
   const [queueLength, setQueueLength] = React.useState<string>('4');
@@ -105,8 +108,8 @@ const HostServer = () => {
     // fetch external IP
     publicIp
       .v4()
-      .then((ip) => {
-        setHost(ip);
+      .then((wan_ip) => {
+        setHost(wan_ip);
         return null;
       })
       .catch(() => {});
@@ -181,7 +184,7 @@ const HostServer = () => {
       {!serverStart && (
         <>
           <div className="field">
-            <div className="label">Server IP address</div>
+            <div className="label">Server WAN IP address</div>
             <div className="control">
               <input
                 className="input"
@@ -420,7 +423,7 @@ const HostServer = () => {
                   style={{ width: 320 }}
                   ref={connectionCodeRef}
                   value={generateConnectionCode(
-                    host,
+                    useLANIP ? LANIP : host,
                     sampleRate,
                     bufferSize,
                     hub,
@@ -452,8 +455,20 @@ const HostServer = () => {
             </div>
             <p className="help">
               Send this code to the other folks. Note: the code changes if you
-              modify audio settings.
+              modify audio settings. LAN IP only works inside your local
+              network.
             </p>
+            <div className="control has-text-right" style={{ marginTop: 5 }}>
+              <button
+                type="button"
+                className="button is-small is-rounded has-text-dark"
+                onClick={() => {
+                  setUseLANIP(!useLANIP);
+                }}
+              >
+                Use {useLANIP ? 'WAN' : 'LAN'} IP
+              </button>
+            </div>
           </div>
         </>
       )}

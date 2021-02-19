@@ -95,7 +95,7 @@ export const startJackTripClient = (
 ) => {
   const params = [
     '-n',
-    '1',
+    '2',
     '-z',
     '-q',
     queueBuffer,
@@ -125,7 +125,7 @@ export const startJackTripServer = (
     '-p',
     hubPatchMode || '2',
     '-n',
-    '1',
+    '2',
     '-q',
     queueBuffer,
     '-b',
