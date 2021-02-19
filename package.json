@@ -1,7 +1,7 @@
 {
   "name": "jamtrip",
   "productName": "JamTrip",
-  "description": "",
+  "description": "Graphical frontend for jack and jacktrip",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.babel.js --colors",
@@ -17,6 +17,9 @@
     "package-all": "yarn build && electron-builder build -mwl",
     "package-ci": "yarn postinstall && yarn build && electron-builder --publish always",
     "package-mac": "yarn build && electron-builder build --mac",
+    "package-pi": "USE_SYSTEM_FPM=true yarn build && electron-builder build --linux dir --armv7l",
+    "package-pi-deb": "USE_SYSTEM_FPM=true yarn build && electron-builder build --linux deb --armv7l",
+    "package-pi-rpm": "USE_SYSTEM_FPM=true yarn build && electron-builder build --linux rpm --armv7l",
     "package-linux": "yarn build && electron-builder build --linux",
     "package-win": "yarn build && electron-builder build --win --x64",
     "postinstall": "node -r @babel/register internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall",

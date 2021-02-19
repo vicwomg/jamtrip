@@ -100,19 +100,24 @@ yarn
 yarn package
 ```
 
-This builds the platform executables into the ./release directory.
+This builds the current platform executables into the ./release directory.
 
 Note: in order to build for raspberry pi, there are extra steps:
 
+Install these packages (the ffi version matters!):
+
 ```
-sudo apt install ruby ruby-dev libffi-dev
+sudo apt install ruby ruby-dev libffi-dev rpm
 sudo gem install ffi -v 1.9.21
 sudo gem install fpm
-yarn
-USE_SYSTEM_FPM=true yarn package --armv7l
 ```
 
-It will bomb out on the rpm build, but you probably don't need it.
+```
+yarn
+yarn package-pi    # for a unpacked dir with the executable file
+yarn package-pi-deb    # for a deb package file
+yarn package-pi-rpm    # for a rpm package file
+```
 
 ## Details
 
