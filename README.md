@@ -19,7 +19,7 @@ Check out [CCRMA](https://ccrma.stanford.edu/software/jacktrip/) for more inform
 
 ## Requirements
 
-- JamTrip is only working on Mac OSX and Windows 10 at the moment.
+- JamTrip is only working on Mac OSX, Windows 10, and raspberry pi (see instructions the end of Readme). You can probably get it running on linux without too much trouble with some version of the rpi instructions
 - A microphone and headphones. Ideally these are running through a professional audio interface for lower latency, however a built-in laptop microphone works fine.
 - You will need an ethernet cable connection to your router. WiFi drops out too much to work right, though you can certainly try it with a high buffer side as proof-of-concept. If you're on a laptop with no ethernet port, you can add one using a [USB to Ethernet adapter (\$12.99)](https://www.amazon.com/TP-Link-Foldable-Gigabit-Ethernet-Compatible/dp/B00YUU3KC6/) and an [ethernet cable](https://www.amazon.com/Ethernet-Cable-Meters-Network-Internet/dp/B00GBBSRKW/). Connect this directly to a free ethernet port on your wifi router.
 - For best results, you're within 200 miles of the other folks you're jamming with, otherwise you start to run into latency limitations from the laws of physics.
@@ -83,7 +83,7 @@ To host a JackTrip server, click the "Host a server" tab in the app, configure y
 
 Once you're both connected, you should see the "connected!" indicator and you should both be able to hear each other!
 
-Note: For server hosting to work, you need to have UDP port 4464 open and if using hub mode, additionally ports 61000-61020 (depending on how many concurrent connections you want to support. Regular servers are one-on-one connections. Hub mode allows 3 or more people. For info on how to forward ports, [this article](https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/) is pretty good.
+Note: For server hosting to work, you need to have TCP/UDP port 4464 open and if using hub mode, additionally TCP/UDP ports 61000-61020 (depending on how many concurrent connections you want to support. Regular servers are one-on-one connections. Hub mode allows 3 or more people. For info on how to forward ports, [this article](https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/) is pretty good.
 
 ## Building JamTrip
 
